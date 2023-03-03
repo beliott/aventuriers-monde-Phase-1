@@ -100,18 +100,23 @@ public class Joueur {
         for (Ville ville : jeu.getPortsLibres()) {
             optionsVilles.add(ville.nom());
         }
+        System.out.println(optionsVilles);
         List<Bouton> boutons = Arrays.asList(
-                new Bouton("Montpellier"),
-                new Bouton("Sète"));
+                new Bouton("Piocher dans une des piles"),
+                new Bouton("Piocher une carte Destination"),
+                new Bouton("Prendre Possession d'une route"),
+                new Bouton("Bâtir un port"),
+                new Bouton("Echanger des pions"),
+                new Bouton("Prendre une carte visible"));
 
         String choix = choisir(
-                "Choisissez votre ville préférée",
-                optionsVilles,
+                "Que voulez vous faire ?",
+                null,
                 boutons,
                 true);
 
         if (choix.equals("")) {
-            log(String.format("%s n'aime aucune ville", toLog()));
+            log(String.format("%s ne souhaite rien faire", toLog()));
         } else {
             log(String.format("%s a choisi %s", toLog(), choix));
         }

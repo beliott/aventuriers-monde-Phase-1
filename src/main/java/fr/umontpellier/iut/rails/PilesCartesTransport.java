@@ -24,18 +24,27 @@ public class PilesCartesTransport {
      * @return la carte retirée ou null
      */
     public CarteTransport piocher() {
-        throw new RuntimeException("Méthode pas encore implémentée !");
+        if (this.estVide()){
+            return null;
+        } else if (this.pilePioche.isEmpty()) {
+            for (CarteTransport c : pileDefausse) {
+                pilePioche.add(c);
+                pileDefausse.remove(c);
+            }
+            Collections.shuffle(pilePioche);
+        }
+        return pilePioche.remove(pilePioche.size() - 1);
     }
 
     public void defausser(CarteTransport carte) {
-        throw new RuntimeException("Méthode pas encore implémentée !");
+        pileDefausse.add(carte);
     }
 
     /**
      * @return true si aucune carte ne peut être prise (si les deux piles sont vides)
      */
     public boolean estVide() {
-        throw new RuntimeException("Méthode pas encore implémentée !");
+        return pilePioche.isEmpty() && pileDefausse.isEmpty();
     }
 
     public List<CarteTransport> getCartes() {
