@@ -38,9 +38,7 @@ public class Jeu implements Runnable {
      */
     private final List<CarteTransport> cartesTransportVisibles;
     /**
-     * Pile des cartes "Destination" (uniquement les destinations "courtes", les
-     * destinations "longues" sont distribuées au début de la partie et ne peuvent
-     * plus être piochées après)
+     * Pile des cartes "Destination"
      */
     private final List<Destination> pileDestinations;
     /**
