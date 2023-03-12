@@ -101,6 +101,9 @@ public class Joueur {
             optionsVilles.add(ville.nom());
         }
         System.out.println(optionsVilles);
+        List <Bouton> boutonsPioche = Arrays.asList(
+                new Bouton("Piocher une carte bateau"),
+                new Bouton("Piocher une carte wagon"));
         List<Bouton> boutons = Arrays.asList(
                 new Bouton("Piocher dans une des piles"),
                 new Bouton("Piocher une carte Destination"),
@@ -108,7 +111,6 @@ public class Joueur {
                 new Bouton("Bâtir un port"),
                 new Bouton("Echanger des pions"),
                 new Bouton("Prendre une carte visible"));
-
         String choix = choisir(
                 "Que voulez vous faire ?",
                 null,
@@ -120,7 +122,24 @@ public class Joueur {
         } else {
             log(String.format("%s a choisi %s", toLog(), choix));
         }
-    }
+        if (choix.equals(boutons.get(0))){
+            log(String.format("%s pioche dans une des piles"));
+            choisir("Que voulez vous piocher",null,boutonsPioche,true);
+            if (choix.equals(boutonsPioche.get(0))){
+                jeu.piocherCarteBateau();
+            }
+            if (choix.equals(boutonsPioche.get(1))){
+                jeu.piocherCarteWagon();
+            }
+        }/*
+        if (choix.equals(boutons.get(1))){
+            Destination choisis = jeu.getPileDestinations().get(genererInt(0,jeu.getPileDestinations().size()));
+            destinations.add(choisis);
+           */
+
+        }
+
+
 
     /**
      * Attend une entrée de la part du joueur (au clavier ou sur la websocket) et
@@ -225,8 +244,60 @@ public class Joueur {
         return false;
     }
 
-    public int calculerScoreFinal() {
-        throw new RuntimeException("Méthode pas encore implémentée !");
+    public int calculerScoreFinal() { // a verif
+        return score+ports.size()+cptScoreDestinations()+cptScorePorts();
+    }
+
+    public int cptScorePorts(){
+        int cpt = 0;
+        for (int i = 0; i < ports.size() ; i++) {
+            int temp = 0;
+            for (int j = 0; j < destinations.size(); j++) {
+                if (ports.get(i).equals(destinations.get(j).getNom())){
+                    temp += 1;
+                }
+            }
+            if (temp == 1){
+                cpt+=20;
+            }
+            if (temp == 2){
+                cpt += 30;
+            }
+            if (temp >= 3){
+                cpt += 40;
+            }
+        }
+        for (int k = 0; k < jeu.getPortsLibres().size() ; k++) {
+            boolean present = false;
+            for (int p = 0; p < ports.size(); p++) {
+                if (ports.get(k).equals(jeu.getPortsLibres().get(p))){
+                    present = true;
+                }
+            }
+            if (present == false){
+                cpt += -4;
+            }
+        }
+        return cpt;
+    }
+
+
+    public int cptScoreDestinations(){
+        int cpt = 0; // compteur de point pour les cartes destinations
+        for (int i = 0; i < this.destinations.size() ; i++) {
+            if (destinationEstComplete(this.destinations.get(i))){
+                if (destinations.get(i).estCarteItineraires(destinations.get(i))){  // carte itineraire
+                    cpt += this.destinations.get(i).getValeurMax();
+                }
+                else {
+                    cpt += this.destinations.get(i).getValeurSimple();
+                }
+            }
+            if (!destinationEstComplete(this.destinations.get(i))){
+                cpt += destinations.get(i).getPenalite();
+            }
+        }
+        return cpt;
     }
 
     /**
@@ -250,5 +321,11 @@ public class Joueur {
                 Map.entry("inPlay", cartesTransportPosees.stream().sorted().toList()),
                 Map.entry("ports", ports.stream().map(Ville::nom).toList()),
                 Map.entry("routes", routes.stream().map(Route::getNom).toList()));
+    }
+    int genererInt(int borneInf, int borneSup){
+        Random random = new Random();
+        int nb;
+        nb = borneInf+random.nextInt(borneSup-borneInf);
+        return nb;
     }
 }

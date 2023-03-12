@@ -252,4 +252,9 @@ public class Jeu implements Runnable {
                 Map.entry("boutons", boutons),
                 Map.entry("log", log));
     }
+
+    public List<Destination> getPileDestinations() {
+        return pileDestinations;
+    }
+
 }

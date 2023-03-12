@@ -9,6 +9,23 @@ public class Destination {
      * Liste des villes à relier
      */
     private final List<String> villes;
+
+    public int getValeurSimple() {
+        return valeurSimple;
+    }
+
+    public int getValeurMax() {
+        return valeurMax;
+    }
+
+    public int getPenalite() {
+        return penalite;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
     /**
      * Score obtenu si les villes de la destination sont connectées en fin de partie
      */
@@ -132,5 +149,11 @@ public class Destination {
         destinations.add(new Destination(List.of("Tehran", "Lahore", "Mumbai", "Bangkok"), 9, 13, 19)); // D64
         destinations.add(new Destination(List.of("Murmansk", "Tiksi", "Novosibirsk", "Yakutsk", "Petropavlovsk"), 20, 30, 36)); // D65
         return destinations;
+    }
+    public boolean estCarteItineraires(Destination d){ // return true si c'est une carte itinéraires
+        if (d.getValeurMax() == valeurSimple){
+            return false;
+        }
+        return true;
     }
 }
