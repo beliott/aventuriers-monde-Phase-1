@@ -33,7 +33,7 @@ public class PilesCartesTransport {
             }
             Collections.shuffle(pilePioche);
         }
-        return pilePioche.remove(pilePioche.size() - 1);
+        return pilePioche.remove(0);
     }
 
     public void defausser(CarteTransport carte) {

@@ -129,6 +129,10 @@ public class Jeu implements Runnable {
         return new ArrayList<>(cartesTransportVisibles);
     }
 
+    public List<Destination> getPileDestinations() {
+        return pileDestinations;
+    }
+
     /**
      * Exécute la partie
      *
@@ -253,8 +257,5 @@ public class Jeu implements Runnable {
                 Map.entry("log", log));
     }
 
-    public List<Destination> getPileDestinations() {
-        return pileDestinations;
-    }
 
 }

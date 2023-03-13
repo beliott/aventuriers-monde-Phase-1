@@ -238,6 +238,55 @@ public class Joueur {
         return String.format("<span class=\"joueur\">%s</span>", nom);
     }
 
+    /**
+     * @return le nombre de gardes gardées par le joueur après tirage, ou 0 si il est impossible de tirer.
+     *
+     * @param debut booleen indiquant si on appelle la fonction au debut de la partie, changeant le nombre de cartes a
+     *              prendre et à garder obligatoirement.
+     * */
+    public int prendreDestinations(boolean debut){
+        /* Variables temporaires pour les cartes piochees a defausser ou non*/
+        ArrayList<Destination> piochees = new ArrayList<Destination>();
+        int nbAPiocher, nbMinAGarder;
+        /* Variables pour réaliser choix */
+        ArrayList<Bouton> buttons = new ArrayList<Bouton>();
+        ArrayList<String> names = new ArrayList<String>();
+        String choixRep = " ";
+
+        if (jeu.getPileDestinations().size() == 0)
+            return 0;
+
+        if(debut){
+            nbAPiocher = 5;
+            nbMinAGarder = 3;
+        } else {
+            if (jeu.getPileDestinations().size() < 4) {
+                nbAPiocher = jeu.getPileDestinations().size();
+            } else
+                nbAPiocher = 4;
+            nbMinAGarder = 1;
+        }
+        // code
+        for (int i = 0; i < nbAPiocher; i++) {
+            piochees.add(jeu.getPileDestinations().remove(0));
+            buttons.add(new Bouton(piochees.get(i).toString(), piochees.get(i).getNom()));
+            names.add(piochees.get(i).getNom());
+        }
+        int nbCartesGardees = piochees.size();
+        while(piochees.size() < nbMinAGarder + 1 && choixRep != ""){
+            choixRep = choisir("Quelle Destination voulez vous défausser ?", names, buttons, true);
+            if (choixRep != ""){
+                for (Destination d :piochees) {
+                    if (d.getNom() == choixRep){
+                        piochees.remove(d);
+                        break;
+                    }
+                }
+            }
+        }
+        return nbCartesGardees;
+    }
+
     boolean destinationEstComplete(Destination d) {
         // Cette méthode pour l'instant renvoie false pour que le jeu puisse s'exécuter.
         // À vous de modifier le corps de cette fonction pour qu'elle retourne la valeur attendue.
