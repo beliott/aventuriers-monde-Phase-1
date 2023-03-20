@@ -1,7 +1,6 @@
 package fr.umontpellier.iut.rails;
 
 import fr.umontpellier.iut.rails.data.*;
-
 import java.util.*;
 
 public class Joueur {
@@ -131,13 +130,106 @@ public class Joueur {
             if (choix.equals(boutonsPioche.get(1))){
                 jeu.piocherCarteWagon();
             }
-        }/*
+
+        }
+        if (choix.equals("Prendre Possession d'une route")){
+            poserRoute();
+        }
+
+        /*
         if (choix.equals(boutons.get(1))){
             Destination choisis = jeu.getPileDestinations().get(genererInt(0,jeu.getPileDestinations().size()));
             destinations.add(choisis);
            */
 
         }
+
+    /* On creer une liste vide routes pour mettre toute les routes que le joueur peut choisir
+     * a l'aide de boucle on verif les routes possible et on les ajoute dans la liste routes
+     * on affiche la liste pour que le joueur choisit + on verif si il peut
+     * si oui, on prend la route et on la retire de liste des route libre , on l'ajoute a la liste des route posseder par
+     * le joueur et on update son nombre de pions wagon/bateau , on ajoute au score et on retire les carte utilisé
+     * si non, on redemande au joueur de choisir
+     */
+    private void poserRoute() {
+        List<String> routes = new ArrayList<>(); // liste vide
+        for (Route route : this.jeu.getRoutesLibres()) { // ajout des routes possible
+            if (this.carteEgalRoute(this.cartesTransport, route, false)) {
+                if ((route.estMaritime() ? this.nbPionsBateau : this.nbPionsWagon) >= route.getLongueur()) {
+                    routes.add(route.getNom());
+                }
+            }
+        }
+        log(routes.toString());
+        String routeChoisis = choisir("Selectionnez une route", routes, null, false);
+        log("La route choisis est : " + routeChoisis);
+        boolean correspondanceTrouvee = false;
+        String couleurChoisis = null;
+        for (Route route : jeu.getRoutesLibres()) {
+            if (Objects.equals(route.getNom(), routeChoisis)) {
+                while (!correspondanceTrouvee && !carteEgalRoute(cartesTransportPosees, route, true)) {
+                    for (CarteTransport carte : cartesTransport) {
+                        if (Objects.equals(carte.getNom(), routeChoisis)) {
+                            if (couleurChoisis == null) {
+                                if (carte.getType() != TypeCarteTransport.JOKER) {
+                                    couleurChoisis = carte.getCouleur().name();
+                                }
+                            } else if (carte.getType() != TypeCarteTransport.JOKER && !carte.getCouleur().name().equals(couleurChoisis)) {
+                                cartesTransportPosees.add(carte);
+                                cartesTransport.remove(carte);
+                            } else {
+                                log("Vous ne pouvez utilisés des cartes qui ne sont pas de la même couleurs");
+                            }
+                            correspondanceTrouvee = carteEgalRoute(cartesTransportPosees, route, true);
+                            break;
+                        }
+                    }
+                }
+                if (correspondanceTrouvee) {
+                    this.routes.add(route);
+                    jeu.getRoutesLibres().remove(route);
+
+                    if (route.estMaritime()) {
+                        nbPionsBateau -= route.getLongueur();
+                    } else {
+                        nbPionsWagon -= route.getLongueur();
+                    }
+                    for (CarteTransport carte : new ArrayList<>(cartesTransportPosees)) {
+                        jeu.getPilesDeCartesBateau().defausser(carte);
+                        cartesTransportPosees.remove(carte);
+                    }
+                    score += route.getScore();
+                }
+            }
+        }
+    }
+
+    private boolean carteEgalRoute(List<CarteTransport> cartesTransportPosees, Route route, boolean montantEgal) {
+        int nbCartes = cartesTransportPosees.size();
+        int nbMaxCartesIdentiques = getNombreMaxCartesIdentiquesForRouteType(route.estMaritime() ? TypeCarteTransport.BATEAU : TypeCarteTransport.WAGON);
+        int nbJoker = getNbJoker(cartesTransportPosees);
+        int nbBonneCouleur = getNbCartesBonneCouleurEtType(cartesTransportPosees,getTypeRoute(route),route.getCouleur());
+        int nbCartesNecessaires = route.getLongueur();
+
+        if (!montantEgal && nbCartes + nbJoker + nbMaxCartesIdentiques >= nbCartesNecessaires) {
+            return true;
+        }
+
+        if (montantEgal && nbCartes != nbCartesNecessaires) {
+            return false;
+        }
+
+        return nbBonneCouleur + nbJoker >= nbCartesNecessaires;
+    }
+    private int getNombreMaxCartesIdentiquesForRouteType(TypeCarteTransport type) {
+        int maxNombreCartes = 0;
+        for (Route route : this.jeu.getRoutesLibres()) {
+            if (getTypeRoute(route) == type && route.getLongueur() > maxNombreCartes) {
+                maxNombreCartes = route.getLongueur();
+            }
+        }
+        return maxNombreCartes;
+    }
 
 
 
@@ -376,5 +468,46 @@ public class Joueur {
         int nb;
         nb = borneInf+random.nextInt(borneSup-borneInf);
         return nb;
+    }
+
+    public int getNbPionsWagon() {
+        return nbPionsWagon;
+    }
+
+    public int getNbPionsWagonEnReserve() {
+        return nbPionsWagonEnReserve;
+    }
+
+    public int getNbPionsBateau() {
+        return nbPionsBateau;
+    }
+
+    public int getNbPionsBateauEnReserve() {
+        return nbPionsBateauEnReserve;
+    }
+    public int getNbJoker(List<CarteTransport> cartesTransportPosees){
+        int res = 0;
+        for (CarteTransport carte : this.cartesTransport) {
+            if (carte.getType() == TypeCarteTransport.JOKER) {
+                res++;
+            }
+        }
+        return res;
+    }
+    private TypeCarteTransport getTypeRoute(Route route) {
+        if (route instanceof RouteMaritime) {
+            return TypeCarteTransport.BATEAU;
+        } else {
+            return TypeCarteTransport.WAGON;
+        }
+    }
+    private int getNbCartesBonneCouleurEtType(List<CarteTransport> cartes, TypeCarteTransport type, Couleur couleur) {
+        int nbCartesBonneCouleurEtType = 0;
+        for (CarteTransport carte : cartes) {
+            if (carte.getCouleur() == couleur && carte.getType() == type) {
+                nbCartesBonneCouleurEtType++;
+            }
+        }
+        return nbCartesBonneCouleurEtType;
     }
 }

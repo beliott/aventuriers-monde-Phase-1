@@ -7,4 +7,10 @@ public class RoutePaire extends Route {
     public RoutePaire(Ville ville1, Ville ville2, int longueur) {
         super(ville1, ville2, Couleur.GRIS, longueur);
     }
+    public boolean estMaritime(){
+        return false;
+    }
+    public boolean estTerrestre(){
+        return true;
+    }
 }

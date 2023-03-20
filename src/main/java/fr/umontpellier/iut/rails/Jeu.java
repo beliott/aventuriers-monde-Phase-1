@@ -258,4 +258,7 @@ public class Jeu implements Runnable {
     }
 
 
+    public PilesCartesTransport getPilesDeCartesBateau() {
+        return null;
+    }
 }

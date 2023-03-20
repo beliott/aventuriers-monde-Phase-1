@@ -1,9 +1,12 @@
 package fr.umontpellier.iut.rails;
 
 import fr.umontpellier.iut.rails.data.Couleur;
+import fr.umontpellier.iut.rails.data.TypeCarteTransport;
 import fr.umontpellier.iut.rails.data.Ville;
 
 public abstract class Route {
+    public abstract boolean estMaritime();
+    public abstract boolean estTerrestre();
     /**
      * Première extrémité
      */
@@ -36,6 +39,7 @@ public abstract class Route {
      * Vous ne devez pas toucher à cet attribut qui est utilisé pour les interfaces (console et web)
      */
     static private int compteur = 1;
+
 
     public Route(Ville ville1, Ville ville2, Couleur couleur, int longueur) {
         this.ville1 = ville1;
