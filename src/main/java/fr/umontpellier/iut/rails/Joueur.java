@@ -383,6 +383,8 @@ public class Joueur {
         // Cette méthode pour l'instant renvoie false pour que le jeu puisse s'exécuter.
         // À vous de modifier le corps de cette fonction pour qu'elle retourne la valeur attendue.
         return false;
+
+        // getRoutePossibleEntreDeuxVilles
     }
 
     public int calculerScoreFinal() { // a verif
@@ -509,5 +511,18 @@ public class Joueur {
             }
         }
         return nbCartesBonneCouleurEtType;
+    }
+
+    public List<Route> getRoutes() { // get des routes que le joueurs possede
+        return routes;
+    }
+    public ArrayList<Route> getRoutesConnexes(String ville){
+        ArrayList<Route> listeConnexes = new ArrayList<Route>();
+        for (Route r: jeu.getRoutesDebut()) {
+            if (r.getVille1().nom() == ville || r.getVille2().nom() == ville){
+                listeConnexes.add(r);
+            }
+        }
+        return listeConnexes;
     }
 }

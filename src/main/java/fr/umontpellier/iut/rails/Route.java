@@ -4,6 +4,8 @@ import fr.umontpellier.iut.rails.data.Couleur;
 import fr.umontpellier.iut.rails.data.TypeCarteTransport;
 import fr.umontpellier.iut.rails.data.Ville;
 
+import java.util.ArrayList;
+
 public abstract class Route {
     public abstract boolean estMaritime();
     public abstract boolean estTerrestre();
@@ -97,8 +99,14 @@ public abstract class Route {
         getVille1().nom(),
         getVille2().nom());
     }
-
     public String toString() {
         return String.format("%s - %s", ville1.nom(), ville2.nom());
     }
+
+    public ArrayList<Route> genererFilsRoute(){
+        ArrayList<Route> routeRes = new ArrayList<>();
+        return null;
+    }
+
+
 }

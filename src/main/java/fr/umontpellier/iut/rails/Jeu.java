@@ -25,6 +25,7 @@ public class Jeu implements Runnable {
      * Liste des routes disponibles sur le plateau de jeu
      */
     private final List<Route> routesLibres;
+    private final List<Route> routesDebut;
     /**
      * Pile de pioche et défausse des cartes wagon
      */
@@ -62,6 +63,10 @@ public class Jeu implements Runnable {
         Plateau plateau = Plateau.makePlateauMonde();
         portsLibres = plateau.getPorts();
         routesLibres = plateau.getRoutes();
+        this.routesDebut = new ArrayList<Route>();
+        for (Route r : routesLibres) {
+            this.routesDebut.add(r);
+        }
 
         // création des piles de pioche et défausses des cartes Transport (wagon et
         // bateau)
@@ -260,5 +265,15 @@ public class Jeu implements Runnable {
 
     public PilesCartesTransport getPilesDeCartesBateau() {
         return null;
+    }
+
+    public ArrayList<Route> genererFilsRoute(){
+        return null;
+    }
+
+
+
+    public List<Route> getRoutesDebut() {
+        return routesDebut;
     }
 }
