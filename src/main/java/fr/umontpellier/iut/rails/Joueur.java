@@ -24,6 +24,7 @@ public class Joueur {
      * Liste des villes sur lesquelles le joueur a construit un port
      */
     private final List<Ville> ports;
+    private int nbPorts;
     /**
      * Liste des routes capturées par le joueur
      */
@@ -68,6 +69,7 @@ public class Joueur {
         this.jeu = jeu;
         this.couleur = couleur;
         this.ports = new ArrayList<>();
+        this.nbPorts = 3;
         this.routes = new ArrayList<>();
         this.nbPionsWagon = 0;
         this.nbPionsWagonEnReserve = 25;
@@ -82,6 +84,12 @@ public class Joueur {
     public String getNom() {
         return nom;
     }
+
+    public List<CarteTransport> getCartesTransport(){
+        return cartesTransport;
+    }
+
+
 
     /**
      * Cette méthode est appelée à tour de rôle pour chacun des joueurs de la partie.
@@ -370,6 +378,7 @@ public class Joueur {
             if (choixRep != ""){
                 for (Destination d :piochees) {
                     if (d.getNom() == choixRep){
+                        jeu.getPileDestinations().add(d); // remet la carte defaussée au fond de la pile destination
                         piochees.remove(d);
                         break;
                     }
@@ -487,6 +496,22 @@ public class Joueur {
     public int getNbPionsBateauEnReserve() {
         return nbPionsBateauEnReserve;
     }
+
+    public void setNbPionsWagon(int nbPionsWagon) {
+        this.nbPionsWagon = nbPionsWagon;
+    }
+
+    public void setNbPionsWagonEnReserve(int nbPionsWagonEnReserve) {
+        this.nbPionsWagonEnReserve = nbPionsWagonEnReserve;
+    }
+
+    public void setNbPionsBateau(int nbPionsBateau) {
+        this.nbPionsBateau = nbPionsBateau;
+    }
+
+    public void setNbPionsBateauEnReserve(int nbPionsBateauEnReserve) {
+        this.nbPionsBateauEnReserve = nbPionsBateauEnReserve;
+    }
     public int getNbJoker(List<CarteTransport> cartesTransportPosees){
         int res = 0;
         for (CarteTransport carte : this.cartesTransport) {
@@ -511,6 +536,19 @@ public class Joueur {
             }
         }
         return nbCartesBonneCouleurEtType;
+    }
+
+    public void setRatioPions(){ // MARCHE QU'AU DEBUT
+        ArrayList<String> nbWagonsAPrendre = new ArrayList<String>();
+        for (int i = 10; i <= 25 ; i++) {
+            nbWagonsAPrendre.add(Integer.toString(i));
+        }
+        log(this.nom+ " détient "+ nbPionsWagon + " pions Wagons et " + nbPionsBateau+ " pions bateaux. ");
+        String choix = choisir("Choisissez le nombre de pions Wagons à prendre ", nbWagonsAPrendre, null,false );
+        nbPionsWagon = Integer.parseInt(choix);
+        nbPionsWagonEnReserve = 25 - nbPionsWagon;
+        nbPionsBateau = 60 - nbPionsWagon;
+        nbPionsBateauEnReserve = 75 - nbPionsBateau;
     }
 
     public List<Route> getRoutes() { // get des routes que le joueurs possede

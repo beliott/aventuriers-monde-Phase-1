@@ -149,6 +149,27 @@ public class Jeu implements Runnable {
     public void run() {
         // IMPORTANT : Le corps de cette fonction est à réécrire entièrement
         // Un exemple très simple est donné pour illustrer l'utilisation de certaines méthodes
+
+        // Début du jeu
+        for (Joueur j: joueurs) {
+            //cartes en main
+            for (int i = 0; i < 3; i++) {
+                j.getCartesTransport().add(pilesDeCartesWagon.piocher());
+            }
+            for (int i = 0; i < 7; i++) {
+                j.getCartesTransport().add(pilesDeCartesBateau.piocher());
+            }
+            // pions ajout
+            j.setNbPionsBateau(50);
+            j.setNbPionsWagon(25);
+            //prendre cartes Destination
+            j.prendreDestinations(true);
+            // changement ratio pions
+            j.setRatioPions();
+            // le nombre de ports que chaque j peut poser est j.nbPorts (= à 3 au début du jeu dans constructeur)
+
+        }
+        // jeu normal
         for (Joueur j : joueurs) {
             joueurCourant = j;
             j.jouerTour();
