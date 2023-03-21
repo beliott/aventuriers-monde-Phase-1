@@ -156,8 +156,14 @@ public class Destination {
         }
         return true;
     }
-
-
-
-
+    /*
+    * ne pas réutiliser getvillesDeDestination sauf pour DestinationEstComplete
+    * */
+    public List<Ville> getVillesDeDestination() { // A voir si la valeur estPort
+        List<Ville> lesVilles = new ArrayList<>();
+        for (int i = 0; i < villes.size(); i++) {
+            lesVilles.add(new Ville(villes.get(i),false));
+        }
+        return lesVilles;
+    }
 }

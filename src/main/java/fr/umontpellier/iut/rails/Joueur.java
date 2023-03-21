@@ -197,10 +197,10 @@ public class Joueur {
                     this.routes.add(route);
                     jeu.getRoutesLibres().remove(route);
 
-                    if (route.estMaritime()) {
-                        nbPionsBateau -= route.getLongueur();
-                    } else {
+                    if (route.estTerrestre()) {
                         nbPionsWagon -= route.getLongueur();
+                    } else {
+                        nbPionsBateau -= route.getLongueur();
                     }
                     for (CarteTransport carte : new ArrayList<>(cartesTransportPosees)) {
                         jeu.getPilesDeCartesBateau().defausser(carte);
@@ -387,13 +387,29 @@ public class Joueur {
         }
         return nbCartesGardees;
     }
+    /* On prends la liste de toute les routes connectés a la ville A d'une carte destination
+    *  a l'aide d'une boucle for, on verifie si on retrouve bien le nom de cette ville parmi toute les villes ou le
+    * joueur passe via des routes. si on passe par toute les villes on return true
+    * */
 
     boolean destinationEstComplete(Destination d) {
-        // Cette méthode pour l'instant renvoie false pour que le jeu puisse s'exécuter.
-        // À vous de modifier le corps de cette fonction pour qu'elle retourne la valeur attendue.
-        return false;
+        if (routesConnectees(d.getVillesDeDestination().get(0)).isEmpty()){  // si cest vide on return false
+            return false;
+        }
 
-        // getRoutePossibleEntreDeuxVilles
+        boolean fini = false;
+        List<Route> lesRoutes = routesConnectees(d.getVillesDeDestination().get(0));
+        for (int i = 0; i < d.getVillesDeDestination().size(); i++) {
+            for (int j = 0; j < lesRoutes.size(); j++) {
+                if (d.getVillesDeDestination().get(i).equals(lesRoutes.get(j)) || d.getVillesDeDestination().get(i).equals(lesRoutes.get(j).getVille2())){
+                    fini = true;
+                }
+            }
+            if (fini = false){
+                return false;
+            }
+        }
+        return true;
     }
 
     public int calculerScoreFinal() { // a verif
@@ -554,13 +570,49 @@ public class Joueur {
     public List<Route> getRoutes() { // get des routes que le joueurs possede
         return routes;
     }
-    public ArrayList<Route> getRoutesConnexes(String ville){
-        ArrayList<Route> listeConnexes = new ArrayList<Route>();
-        for (Route r: jeu.getRoutesDebut()) {
-            if (r.getVille1().nom() == ville || r.getVille2().nom() == ville){
-                listeConnexes.add(r);
+    public List<Route> getRoutesAdjacentesDuJoueur(Ville ville) { // ce sont les routes adjacente d'une villé donné
+        List<Route> routesAdjacentes = new ArrayList<>();           // capturé par un joueur
+        for (Route route : routes) {
+            if (route.getVille1().equals(ville) || route.getVille2().equals(ville)) {
+                routesAdjacentes.add(route);
             }
         }
-        return listeConnexes;
+        return routesAdjacentes;
+    }
+
+    public List<Route> routesConnectees(Ville depart) {
+        List<Ville> villesVisitees = new ArrayList<>();
+        List<Route> routesVisitees = new ArrayList<>();
+        List<Ville> file = new ArrayList<>();
+        villesVisitees.add(depart);
+        file.add(depart);
+        int i= 0;
+        while (i < file.size()) {
+            Ville villeCourante = file.get(i++);
+            for (Route route : getRoutesAdjacentesDuJoueur(villeCourante)) {
+                if (!routesVisitees.contains(route)) {
+                    Ville villeSuivante = (route.getVille1().equals(villeCourante)) ? route.getVille2() : route.getVille1();
+
+                    if (!villesVisitees.contains(villeSuivante)) {
+                        villesVisitees.add(villeSuivante);
+                        file.add(villeSuivante);
+                    }
+                    routesVisitees.add(route);
+                }
+            }
+        }
+        return routesVisitees;
+    }
+
+
+
+    public ArrayList<Route> getRouteDeVille(Ville choisis){
+        ArrayList<Route> listeDeRoute = new ArrayList<>();
+        for (Route r: jeu.getRoutesDebut()) {
+            if (r.getVille1().equals(choisis)|| r.getVille2().equals(choisis)){
+                listeDeRoute.add(r);
+            }
+        }
+        return listeDeRoute;
     }
 }
