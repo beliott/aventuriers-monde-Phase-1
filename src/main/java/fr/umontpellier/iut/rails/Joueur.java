@@ -1,5 +1,6 @@
 package fr.umontpellier.iut.rails;
 
+import fr.umontpellier.iut.rails.Route;
 import fr.umontpellier.iut.rails.data.*;
 import java.util.*;
 
@@ -421,7 +422,7 @@ public class Joueur {
         for (int i = 0; i < ports.size() ; i++) {
             int temp = 0;
             for (int j = 0; j < destinations.size(); j++) {
-                if (ports.get(i).equals(destinations.get(j).getNom())){
+                if (ports.get(i).equals(destinations.get(j)) && destinationEstComplete(destinations.get(j))){
                     temp += 1;
                 }
             }
@@ -435,10 +436,10 @@ public class Joueur {
                 cpt += 40;
             }
         }
-        for (int k = 0; k < jeu.getPortsLibres().size() ; k++) {
+        for (int k = 0; k < lesVillescapturésParleJoueur().size(); k++) {
             boolean present = false;
             for (int p = 0; p < ports.size(); p++) {
-                if (ports.get(k).equals(jeu.getPortsLibres().get(p))){
+                if (lesVillescapturésParleJoueur().get(k).estPort() && lesVillescapturésParleJoueur().equals(ports.get(p))){
                     present = true;
                 }
             }
@@ -447,6 +448,28 @@ public class Joueur {
             }
         }
         return cpt;
+    }
+    public List<Ville> lesVillescapturésParleJoueur(){
+        List<Ville> lesVilles = new ArrayList<>();
+        for (int i = 0; i < routes.size() ; i++) {
+            Route ajouter = routes.get(i);
+            if (!lesVilles.contains(ajouter.getVille1())){
+                lesVilles.add(ajouter.getVille1());
+            }
+            if (!lesVilles.contains(ajouter.getVille2())){
+                lesVilles.add(ajouter.getVille2());
+            }
+        }
+        return lesVilles;
+    }
+    public List<Ville> listeVilleDestinationComplete(){
+        List<Ville> lesVilles = new ArrayList<>();
+        for (int i = 0; i < destinations.size() ; i++) {
+            if (destinationEstComplete(destinations.get(i))){
+                lesVilles.addAll(destinations.get(i).getVillesDeDestination());
+            }
+        }
+        return lesVilles;
     }
 
 
