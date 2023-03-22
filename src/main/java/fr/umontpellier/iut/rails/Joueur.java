@@ -374,17 +374,26 @@ public class Joueur {
             names.add(piochees.get(i).getNom());
         }
         int nbCartesGardees = piochees.size();
-        while(piochees.size() < nbMinAGarder + 1 && choixRep != ""){
+        while(piochees.size() > nbMinAGarder && choixRep != ""){
             choixRep = choisir("Quelle Destination voulez vous défausser ?", names, buttons, true);
             if (choixRep != ""){
                 for (Destination d :piochees) {
-                    if (d.getNom() == choixRep){
+                    if (Objects.equals(d.getNom(), choixRep)){
                         jeu.getPileDestinations().add(d); // remet la carte defaussée au fond de la pile destination
                         piochees.remove(d);
+                        names.remove(d.getNom()); // enlever la carte défaussée de la liste des choix
+                        for (Bouton b :buttons) {
+                            if (b.valeur() == d.getNom()){
+                                buttons.remove(b);
+                            }
+                        }
                         break;
                     }
                 }
             }
+        }
+        for (Destination d: piochees) {
+            this.destinations.add(d);
         }
         return nbCartesGardees;
     }
@@ -587,7 +596,7 @@ public class Joueur {
         nbPionsWagon = Integer.parseInt(choix);
         nbPionsWagonEnReserve = 25 - nbPionsWagon;
         nbPionsBateau = 60 - nbPionsWagon;
-        nbPionsBateauEnReserve = 75 - nbPionsBateau;
+        nbPionsBateauEnReserve = 50 - nbPionsBateau;
     }
 
     public List<Route> getRoutes() { // get des routes que le joueurs possede

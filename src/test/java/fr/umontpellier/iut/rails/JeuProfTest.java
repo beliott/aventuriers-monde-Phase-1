@@ -50,6 +50,7 @@ public class JeuProfTest {
         joueurs = (List<Joueur>) TestUtils.getAttribute(jeu, "joueurs");
     }
 
+    /* OK */
     @Test
     void testCartesWagon() {
         // regrouper toutes les cartes wagon du jeu
@@ -90,6 +91,7 @@ public class JeuProfTest {
         assertEquals(3, nbBateau);
     }
 
+    /* OK */
     @Test
     void testDestinationsInitialesTousLesJoueursPassent() {
         jeu.setInput("", "10", "", "10", "", "10", "", "10");
@@ -103,6 +105,7 @@ public class JeuProfTest {
         }
     }
 
+    /* OK */
     @Test
     void testDestinationsInitialesJoueursDefaussent() {
         List<String> instructions = new ArrayList<>();
@@ -125,6 +128,7 @@ public class JeuProfTest {
         }
     }
 
+    /* OK */
     @Test
     void testPionsWagonEtBateau() {
         jeu.setInput(

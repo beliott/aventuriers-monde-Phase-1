@@ -8,6 +8,11 @@ public record Bouton(
         this(valeur, valeur);
     }
 
+    @Override
+    public String valeur() {
+        return valeur;
+    }
+
     public String toPrompt() {
         if (label.equals(valeur)) {
             return valeur;
