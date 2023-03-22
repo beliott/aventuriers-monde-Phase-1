@@ -383,6 +383,7 @@ public class Joueur {
                         piochees.remove(d);
                         names.remove(d.getNom()); // enlever la carte défaussée de la liste des choix
                         for (Bouton b :buttons) {
+
                             if (b.valeur() == d.getNom()){
                                 buttons.remove(b);
                             }

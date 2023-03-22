@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 import fr.umontpellier.iut.gui.GameServer;
 import fr.umontpellier.iut.rails.data.*;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -296,5 +298,66 @@ public class Jeu implements Runnable {
 
     public List<Route> getRoutesDebut() {
         return routesDebut;
+    }
+    
+    /* Fonctions cartes visibles */
+    
+    public void poserUneCarteVisible(){
+        ArrayList<Bouton> buttons = new ArrayList<Bouton>();
+        ArrayList<String> strChoixPossibles = new ArrayList<String>();
+
+        if (piocheBateauEstVide() && piocheWagonEstVide())
+            return;
+        else{
+            if (!piocheWagonEstVide()){
+                buttons.add(new Bouton("WAGON"));
+                strChoixPossibles.add("WAGON");
+            }
+            if (!piocheBateauEstVide()){
+                buttons.add(new Bouton("BATEAU"));
+                strChoixPossibles.add("BATEAU");
+            }
+            String choix = joueurCourant.choisir("Dans quelle pile voulez-vous piocher une carte à retourner ?", strChoixPossibles, buttons, false);
+            if (choix.equals("WAGON")){
+                cartesTransportVisibles.add(piocherCarteWagon());
+            } else if (choix.equals("BATEAU")) { // pas besoin de verif car ne sort pas du choix si pas possible de tirer une carte du type ou pile vide
+                cartesTransportVisibles.add(piocherCarteBateau());
+            }
+        }
+    }
+    
+    public void poserCartesVisibles(){
+        int nbW, nbB;
+        if (piocheWagonEstVide() && piocheBateauEstVide())
+            return;
+        else if (pilesDeCartesBateau.getFullSize() + pilesDeCartesWagon.getFullSize() > 6){ // si + de 3 cartes dans chaque pioche
+
+            if (pilesDeCartesWagon.getFullSize() == 3) { // cas ou 3 wagons et 3 sont jokers
+                int cpt = 0;
+                for (CarteTransport c: pilesDeCartesWagon.getPilePioche()) {
+                    if(c.getCouleur().equals(Couleur.GRIS))
+                        cpt++;
+                }
+                for (CarteTransport c: pilesDeCartesBateau.getPileDefausse()) {
+                    if(c.getCouleur().equals(Couleur.GRIS))
+                        cpt++;
+                }
+                if (cpt != 3 ){ // si pas 3 jokers c'est bon
+                    nbW = 3;
+                    nbB = 3;
+                } else if (cpt == 3 && pilesDeCartesBateau.getFullSize() > 3){ // si on peut eviter de mettre 3 Jokers en changeant le ratio
+                    nbW = 2;
+                    nbB = 4;
+                }else { // si plus de cartes dispo pour echanger on laisse tel quel
+                    nbW = 3;
+                    nbB = 3;
+                }
+            } else if (pilesDeCartesBateau.getFullSize() == 3 && pilesDeCartesWagon.getFullSize() >= 3) {
+                // TODO : A CONTINUER
+                // if ()
+            }
+
+        }
+        
     }
 }

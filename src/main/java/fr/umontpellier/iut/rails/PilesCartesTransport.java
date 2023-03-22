@@ -18,6 +18,14 @@ public class PilesCartesTransport {
         Collections.shuffle(pilePioche);
     }
 
+    public List<CarteTransport> getPilePioche() {
+        return pilePioche;
+    }
+
+    public List<CarteTransport> getPileDefausse() {
+        return pileDefausse;
+    }
+
     /**
      * Retire une carte. Si la pioche est vide, alors on mélange les cartes de la défausse et on les transfère dans la pioche.
      * La fonction retire et renvoie la première carte de la pioche (si elle existe) et null sinon.
@@ -47,12 +55,28 @@ public class PilesCartesTransport {
         return pilePioche.isEmpty() && pileDefausse.isEmpty();
     }
 
+    /**
+     * Remet les cartes de la defausse dans la pioche et melange, si defausse vide, melange juste
+     * @return la taille de la pioche
+     * */
+    public int melange(){
+        if (!pileDefausse.isEmpty()){
+            for (CarteTransport c: pileDefausse) {
+                pilePioche.add(c);
+                pileDefausse.remove(c);
+            }
+        }
+        Collections.shuffle(pilePioche);
+        return pilePioche.size();
+    }
+
     public List<CarteTransport> getCartes() {
         ArrayList<CarteTransport> cartes = new ArrayList<>();
         cartes.addAll(pilePioche);
         cartes.addAll(pileDefausse);
         return cartes;
     }
+    public int getFullSize(){return pilePioche.size() + pileDefausse.size();}
 
     public Map<String, Object> dataMap() {
         return Map.ofEntries(
