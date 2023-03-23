@@ -258,7 +258,14 @@ public class Joueur {
                 carteJoker.add(lesCarteAncre.get(i));
             }
         }
-        if (cptCarteBateau < 2 && cptCarteWagon + cptCarteJoker < 2){
+        if (!(cptCarteJoker >= 4) && !(cptCarteJoker >= 3 && cptCarteWagon >= 1)
+                && !(cptCarteJoker >= 3 && cptCarteBateau >= 1)
+                && !(cptCarteJoker >= 2 && cptCarteWagon >= 2) && !(cptCarteJoker >= 2 && cptCarteBateau >= 2)
+                && !(cptCarteJoker >= 2 && cptCarteBateau >= 1 && cptCarteWagon >= 1)
+                && !(cptCarteJoker >= 1 && cptCarteWagon >= 2 && cptCarteBateau >=1)
+                && !(cptCarteJoker >= 1 && cptCarteWagon >= 1 && cptCarteBateau >=1)
+                && !(cptCarteJoker == 0 && cptCarteBateau >=2 && cptCarteWagon >= 2))
+        {
             return false;
         }
         int nbCoul = 0;
@@ -292,6 +299,7 @@ public class Joueur {
         }
         return false;
     }
+
     /* On creer une liste vide routes pour mettre toute les routes que le joueur peut choisir
      * a l'aide de boucle on verif les routes possible et on les ajoute dans la liste routes
      * on affiche la liste pour que le joueur choisit + on verif si il peut
