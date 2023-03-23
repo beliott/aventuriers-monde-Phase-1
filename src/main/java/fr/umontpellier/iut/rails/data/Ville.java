@@ -17,4 +17,8 @@ public record Ville(
         return String.format("<span class=\"ville\">%s</span>", nom);
     }
 
+    @Override
+    public boolean estPort() {
+        return estPort;
+    }
 }

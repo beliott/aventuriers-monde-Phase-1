@@ -2,6 +2,8 @@ package fr.umontpellier.iut.rails;
 
 import fr.umontpellier.iut.rails.Route;
 import fr.umontpellier.iut.rails.data.*;
+
+import java.lang.reflect.Type;
 import java.util.*;
 
 public class Joueur {
@@ -108,6 +110,22 @@ public class Joueur {
         for (Ville ville : jeu.getPortsLibres()) {
             optionsVilles.add(ville.nom());
         }
+        ArrayList<String> options = new ArrayList<>();
+        options.add("WAGON");
+        options.add("BATEAU");
+        options.add("DESTINATION");
+        options.add("PIONS WAGON");
+        options.add("PIONS BATEAU");
+        for (int i = 0; i < jeu.getRoutesLibres().size(); i++) {
+            options.add(jeu.getRoutesLibres().get(i).getNom());
+        }
+        for (int i = 0; i < jeu.getPortsLibres().size(); i++) {
+            options.add(jeu.getPortsLibres().get(i).nom());
+        }
+        for (int i = 0; i < jeu.getCartesTransportVisibles().size(); i++) {
+            options.add(jeu.getCartesTransportVisibles().get(i).getNom());
+        }
+
         System.out.println(optionsVilles);
         List <Bouton> boutonsPioche = Arrays.asList(
                 new Bouton("Piocher une carte bateau"),
@@ -152,7 +170,128 @@ public class Joueur {
            */
 
         }
+        private void poserPort(String nom){
+            List<CarteTransport> lesCartesPossedes = new ArrayList<>();
+            lesCartesPossedes.addAll(cartesTransport);
+            boolean peutPasser = false;
+            List<String> carteTransportsEnString = new ArrayList<>();
+            for (CarteTransport c: this.cartesTransport) {
+                carteTransportsEnString.add(c.getNom());
+            }
+            int nbCartes = 0;
+            int deuxWagons = 0;
+            int deuxBateaux = 0;
+            int cptJoker = 0;
+            List<String> quatreCarteEnString = new ArrayList<>();
+            List<CarteTransport> quatreCarte = new ArrayList<>();
+            do {
+                Couleur laCouleurChoisis = null;
 
+                // premier tour qui permet de definir la couleur + choix premiere carte
+                if ( cptJoker +deuxWagons + deuxBateaux == 0){
+                    String choisis = choisir("Veuillez selectionner deux cartes Wagons et deux cartes Bateaux",carteTransportsEnString,null,false);
+                    quatreCarteEnString.add(choisis);
+                    log("Vous avez choisis " + nbCartes + " cartes");
+                    carteTransportsEnString.remove(choisis);
+
+                    if (laCouleurChoisis == null){ //
+                        for (CarteTransport c: lesCartesPossedes) {
+                            if (choisis == c.getNom() && c.getType() != TypeCarteTransport.JOKER){
+                                laCouleurChoisis = c.getCouleur();
+                                quatreCarte.add(c);
+
+                            }
+                        }
+                        if (quatreCarte.get(0).getType() == TypeCarteTransport.WAGON){
+                            deuxWagons++;
+                        }
+                        else if (quatreCarte.get(0).getType() == TypeCarteTransport.JOKER){
+                            cptJoker++;
+                        }
+                        else if (quatreCarte.get(0).getType() == TypeCarteTransport.BATEAU){
+                            deuxBateaux++;
+                        }
+                    }
+
+
+                }
+                else {
+                    String secondChoix =  choisir("Veuillez selectionner deux cartes Wagons et deux cartes Bateaux",carteTransportsEnString,null,false);
+                }
+
+
+
+
+
+
+            } while (peutPasser == false);
+
+
+        }
+
+
+    private boolean peutPoserPort(){
+        boolean TuPeuxConstruireOuPas = false;
+        if (jeu.getPortsLibres().isEmpty()){
+            return false;
+        }
+        List<CarteTransport> lesCarteAncre = getCarteAncre();
+        if (lesCarteAncre.size() < 4){
+            return false;
+        }
+        int cptCarteWagon = 0;
+        List<CarteTransport> carteWagons = new ArrayList<>();
+        int cptCarteBateau = 0;
+        List<CarteTransport> carteBateau = new ArrayList<>();
+        int cptCarteJoker = 0;
+        List<CarteTransport> carteJoker = new ArrayList<>();
+        for (int i = 0; i < lesCarteAncre.size(); i++) {
+            if (lesCarteAncre.get(i).getType() == TypeCarteTransport.WAGON){
+                cptCarteWagon ++;
+                carteWagons.add(lesCarteAncre.get(i));
+            }
+            else if (lesCarteAncre.get(i).getType() == TypeCarteTransport.BATEAU){
+                cptCarteBateau ++;
+                carteBateau.add(lesCarteAncre.get(i));
+            } else if (lesCarteAncre.get(i).getType() == TypeCarteTransport.JOKER) {
+                cptCarteJoker ++;
+                carteJoker.add(lesCarteAncre.get(i));
+            }
+        }
+        if (cptCarteBateau < 2 && cptCarteWagon + cptCarteJoker < 2){
+            return false;
+        }
+        int nbCoul = 0;
+        int deuxWagons = 0;
+        int deuxBateaux = 0;
+        List<CarteTransport> carteAUtilisé = new ArrayList<>();
+        for (Couleur c: Couleur.values()) {
+            nbCoul= 0;
+            deuxWagons = 0;
+            deuxBateaux = 0;
+            if (!carteAUtilisé.isEmpty()){
+                carteAUtilisé.removeAll(carteAUtilisé);
+            }
+            for (CarteTransport cart: lesCarteAncre) {
+                if(cart.getCouleur() == c && cart.getType() == TypeCarteTransport.WAGON && deuxWagons < 2 ){
+                    carteAUtilisé.add(cart);
+                    nbCoul++;
+                }
+                if(cart.getCouleur() == c && cart.getType() == TypeCarteTransport.BATEAU && deuxBateaux < 2 ){
+                    carteAUtilisé.add(cart);
+                    nbCoul++;
+                }
+                if (cart.getType() == TypeCarteTransport.JOKER){
+                    carteAUtilisé.add(cart);
+                }
+
+            }
+            if (deuxWagons + cptCarteJoker >= 2 && deuxBateaux >= 2){
+                return true;
+            }
+        }
+        return false;
+    }
     /* On creer une liste vide routes pour mettre toute les routes que le joueur peut choisir
      * a l'aide de boucle on verif les routes possible et on les ajoute dans la liste routes
      * on affiche la liste pour que le joueur choisit + on verif si il peut
@@ -398,10 +537,6 @@ public class Joueur {
         }
         return nbCartesGardees;
     }
-    /* On prends la liste de toute les routes connectés a la ville A d'une carte destination
-    *  a l'aide d'une boucle for, on verifie si on retrouve bien le nom de cette ville parmi toute les villes ou le
-    * joueur passe via des routes. si on passe par toute les villes on return true
-    * */
 
     boolean destinationEstComplete(Destination d) {
         if (routesConnectees(d.getVillesDeDestination().get(0)).isEmpty()){  // si cest vide on return false
@@ -411,6 +546,7 @@ public class Joueur {
         boolean fini = false;
         List<Route> lesRoutes = routesConnectees(d.getVillesDeDestination().get(0));
         for (int i = 0; i < d.getVillesDeDestination().size(); i++) {
+            fini = false;
             for (int j = 0; j < lesRoutes.size(); j++) {
                 if (d.getVillesDeDestination().get(i).equals(lesRoutes.get(j)) || d.getVillesDeDestination().get(i).equals(lesRoutes.get(j).getVille2())){
                     fini = true;
@@ -599,7 +735,6 @@ public class Joueur {
         nbPionsBateau = 60 - nbPionsWagon;
         nbPionsBateauEnReserve = 50 - nbPionsBateau;
     }
-
     public List<Route> getRoutes() { // get des routes que le joueurs possede
         return routes;
     }
@@ -612,7 +747,6 @@ public class Joueur {
         }
         return routesAdjacentes;
     }
-
     public List<Route> routesConnectees(Ville depart) {
         List<Ville> villesVisitees = new ArrayList<>();
         List<Route> routesVisitees = new ArrayList<>();
@@ -636,9 +770,6 @@ public class Joueur {
         }
         return routesVisitees;
     }
-
-
-
     public ArrayList<Route> getRouteDeVille(Ville choisis){
         ArrayList<Route> listeDeRoute = new ArrayList<>();
         for (Route r: jeu.getRoutesDebut()) {
@@ -648,4 +779,32 @@ public class Joueur {
         }
         return listeDeRoute;
     }
+
+    public List<CarteTransport> getCarteAncre(){
+        List<CarteTransport> lesCartesAncres = new ArrayList<>();
+        for (CarteTransport c: cartesTransport) {
+            if (c.getAncre()){
+                lesCartesAncres.add(c);
+            }
+        }
+        return lesCartesAncres;
+    }
+
+    public boolean couleurCheckCount(List<CarteTransport> listeAVerif){//check si il ya au moins 2 carte de meme couleurs
+        int nbCoul = 0;
+        boolean deuxCoulSiIlEstCool = false;
+        for (Couleur c : Couleur.values()) {
+            nbCoul = 0;
+            for (CarteTransport cart : listeAVerif) {
+                if (cart.getCouleur() == c){
+                    nbCoul++;
+                }
+            }
+            if (nbCoul >= 2){
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
