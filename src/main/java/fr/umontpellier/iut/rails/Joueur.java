@@ -162,6 +162,17 @@ public class Joueur {
         if (choix.equals("Prendre Possession d'une route")){
             poserRoute();
         }
+        /* exemple port utilisation (a changer comme bon te semble) */
+        if (choix.equals("Bâtir un port")){
+            if (!peutPoserPort().isEmpty()) { // verifie si il a les cartes pour poser un port
+                String exemple = null;
+                for (Ville v : lesVillescapturésParleJoueur()) { // ville ou il y a au moins une route du joueur a côté
+                    if (v.getNom().equals(exemple)) {
+                        poserPort(exemple);
+                    }
+                }
+            }
+        }
 
         /*
         if (choix.equals(boutons.get(1))){
@@ -170,74 +181,255 @@ public class Joueur {
            */
 
         }
-        private void poserPort(String nom){
+
+        private void poserPort(String nomDuPort) {
+            if (this.cartesTransport.isEmpty()) {
+                return;
+            }
+            List<Couleur> lesCouleursPaiementPossible = peutPoserPort();
+
             List<CarteTransport> lesCartesPossedes = new ArrayList<>();
             lesCartesPossedes.addAll(cartesTransport);
             boolean peutPasser = false;
             List<String> carteTransportsEnString = new ArrayList<>();
-            for (CarteTransport c: this.cartesTransport) {
+            for (CarteTransport c : this.cartesTransport) {
                 carteTransportsEnString.add(c.getNom());
             }
+            int tour = 1;
+            String un, deux, trois, quatre;
             int nbCartes = 0;
-            int deuxWagons = 0;
-            int deuxBateaux = 0;
+            int cptWagon = 0;
+            int cptBateaux = 0;
             int cptJoker = 0;
+
             List<String> quatreCarteEnString = new ArrayList<>();
             List<CarteTransport> quatreCarte = new ArrayList<>();
             do {
+                tour = 1;
                 Couleur laCouleurChoisis = null;
 
                 // premier tour qui permet de definir la couleur + choix premiere carte
-                if ( cptJoker +deuxWagons + deuxBateaux == 0){
-                    String choisis = choisir("Veuillez selectionner deux cartes Wagons et deux cartes Bateaux",carteTransportsEnString,null,false);
-                    quatreCarteEnString.add(choisis);
-                    log("Vous avez choisis " + nbCartes + " cartes");
-                    carteTransportsEnString.remove(choisis);
-
-                    if (laCouleurChoisis == null){ //
-                        for (CarteTransport c: lesCartesPossedes) {
-                            if (choisis == c.getNom() && c.getType() != TypeCarteTransport.JOKER){
-                                laCouleurChoisis = c.getCouleur();
+                if (cptJoker + cptWagon + cptBateaux == 0 && tour == 1) {
+                    do {
+                        un = choisir("Veuillez selectionner deux cartes Wagons et deux cartes Bateaux", carteTransportsEnString, null, false);
+                        for (CarteTransport c : lesCartesPossedes) {
+                            if (un.equals(c.getNom())) {
                                 quatreCarte.add(c);
-
+                                quatreCarteEnString.add(un);
                             }
                         }
-                        if (quatreCarte.get(0).getType() == TypeCarteTransport.WAGON){
-                            deuxWagons++;
+                        if (laCouleurChoisis == null) {//
+                            for (CarteTransport c : lesCartesPossedes) {
+                                if (un.equals(c.getNom()) && c.getType().equals(TypeCarteTransport.JOKER) == false) {
+                                    laCouleurChoisis = c.getCouleur();
+                                    quatreCarte.add(c);
+                                }
+                            }
                         }
-                        else if (quatreCarte.get(0).getType() == TypeCarteTransport.JOKER){
-                            cptJoker++;
+
+                    } while (quatreCarte.get(0).getAncre() == false && (lesCouleursPaiementPossible.contains(laCouleurChoisis) || laCouleurChoisis == null));
+
+                    carteTransportsEnString.remove(un);
+
+                }
+                tour++;
+                if (quatreCarte.get(0).getType() == TypeCarteTransport.WAGON) {
+                    cptWagon++;
+                } else if (quatreCarte.get(0).getType() == TypeCarteTransport.JOKER) {
+                    cptJoker++;
+                } else if (quatreCarte.get(0).getType() == TypeCarteTransport.BATEAU) {
+                    cptBateaux++;
+                }
+
+                if (tour == 2) {
+                    do {
+                        if (quatreCarte.size() == 2) {
+                            quatreCarte.remove(1);
                         }
-                        else if (quatreCarte.get(0).getType() == TypeCarteTransport.BATEAU){
-                            deuxBateaux++;
+                        if (quatreCarteEnString.size() == 2) {
+                            quatreCarteEnString.remove(1);
                         }
+                        deux = choisir("Veuillez selectionner une deuxieme carte", carteTransportsEnString, null, false);
+                        for (CarteTransport c : lesCartesPossedes) {
+                            if (deux.equals(c.getNom())) {
+                                quatreCarte.add(c);
+                                quatreCarteEnString.add(deux);
+                            }
+                        }
+                        if (laCouleurChoisis == null) {//
+                            for (CarteTransport c : lesCartesPossedes) {
+                                if (deux.equals(c.getNom()) && c.getType().equals(TypeCarteTransport.JOKER) == false) {
+                                    laCouleurChoisis = c.getCouleur();
+                                    quatreCarte.add(c);
+                                }
+                            }
+
+                        }
+                    } while ((quatreCarte.get(1).getAncre() == false && (!quatreCarte.get(1).getCouleur().equals(laCouleurChoisis) || laCouleurChoisis == null)) || !quatreCarte.get(1).getType().equals(TypeCarteTransport.JOKER) && (lesCouleursPaiementPossible.contains(laCouleurChoisis) || laCouleurChoisis == null));
+                    carteTransportsEnString.remove(deux);
+                }
+                tour++;
+                if (quatreCarte.get(1).getType() == TypeCarteTransport.WAGON) {
+                    cptWagon++;
+                } else if (quatreCarte.get(1).getType() == TypeCarteTransport.JOKER) {
+                    cptJoker++;
+                } else if (quatreCarte.get(1).getType() == TypeCarteTransport.BATEAU) {
+                    cptBateaux++;
+                }
+
+                if (tour == 3) {
+                    if (cptBateaux == 2) {
+                        do {
+                            if (quatreCarte.size() == 3) {
+                                quatreCarte.remove(2);
+                            }
+                            if (quatreCarteEnString.size() == 3) {
+                                quatreCarteEnString.remove(2);
+                            }
+                            trois = choisir("Veuillez selectionner une troisième carte", carteTransportsEnString, null, false);
+                            for (CarteTransport c : lesCartesPossedes) {
+                                if (trois.equals(c.getNom())) {
+                                    quatreCarte.add(c);
+                                    quatreCarteEnString.add(trois);
+                                }
+                            }
+                            if (laCouleurChoisis == null) {//
+                                for (CarteTransport c : lesCartesPossedes) {
+                                    if (trois.equals(c.getNom()) && c.getType().equals(TypeCarteTransport.JOKER) == false) {
+                                        laCouleurChoisis = c.getCouleur();
+                                    }
+                                }
+
+                            }
+                        } while ((quatreCarte.get(2).getAncre() == false && (!quatreCarte.get(2).getCouleur().equals(laCouleurChoisis) || laCouleurChoisis == null)) && (quatreCarte.get(2).getType().equals(TypeCarteTransport.BATEAU) || !quatreCarte.get(2).getType().equals(TypeCarteTransport.JOKER))&& (lesCouleursPaiementPossible.contains(laCouleurChoisis) || laCouleurChoisis == null));
+
+
+                    } else if (cptWagon == 2) {
+                        do {
+                            if (quatreCarte.size() == 3) {
+                                quatreCarte.remove(2);
+                            }
+                            if (quatreCarteEnString.size() == 3) {
+                                quatreCarteEnString.remove(2);
+                            }
+                            trois = choisir("Veuillez selectionner une troisième carte", carteTransportsEnString, null, false);
+                            for (CarteTransport c : lesCartesPossedes) {
+                                if (trois.equals(c.getNom())) {
+                                    quatreCarte.add(c);
+                                    quatreCarteEnString.add(trois);
+                                }
+                            }
+                            if (laCouleurChoisis == null) {//
+                                for (CarteTransport c : lesCartesPossedes) {
+                                    if (trois.equals(c.getNom()) && c.getType().equals(TypeCarteTransport.JOKER) == false) {
+                                        laCouleurChoisis = c.getCouleur();
+                                    }
+                                }
+                            }
+                        } while ((quatreCarte.get(2).getAncre() == false && (!quatreCarte.get(2).getCouleur().equals(laCouleurChoisis) || laCouleurChoisis == null)) && (quatreCarte.get(2).getType().equals(TypeCarteTransport.WAGON) || !quatreCarte.get(2).getType().equals(TypeCarteTransport.JOKER)) && (lesCouleursPaiementPossible.contains(laCouleurChoisis) || laCouleurChoisis == null));
+
+                    } else {
+                        do {
+                            if (quatreCarte.size() == 3) {
+                                quatreCarte.remove(2);
+                            }
+                            if (quatreCarteEnString.size() == 3) {
+                                quatreCarteEnString.remove(2);
+                            }
+                            trois = choisir("Veuillez selectionner une troisième carte", carteTransportsEnString, null, false);
+                            for (CarteTransport c : lesCartesPossedes) {
+                                if (trois.equals(c.getNom())) {
+                                    quatreCarte.add(c);
+                                    quatreCarteEnString.add(trois);
+                                }
+                            }
+                            if (laCouleurChoisis == null) {//
+                                for (CarteTransport c : lesCartesPossedes) {
+                                    if (trois.equals(c.getNom()) && c.getType().equals(TypeCarteTransport.JOKER) == false) {
+                                        laCouleurChoisis = c.getCouleur();
+                                    }
+                                }
+                            }
+                        } while ((quatreCarte.get(2).getAncre() == false && (!quatreCarte.get(2).getCouleur().equals(laCouleurChoisis) || laCouleurChoisis == null)) || !quatreCarte.get(2).getType().equals(TypeCarteTransport.JOKER) && (lesCouleursPaiementPossible.contains(laCouleurChoisis) || laCouleurChoisis == null));
+                        carteTransportsEnString.remove(trois);
                     }
+                }
+                tour++;
+                if (quatreCarte.get(2).getType() == TypeCarteTransport.WAGON) {
+                    cptWagon++;
+                } else if (quatreCarte.get(2).getType() == TypeCarteTransport.JOKER) {
+                    cptJoker++;
+                } else if (quatreCarte.get(2).getType() == TypeCarteTransport.BATEAU) {
+                    cptBateaux++;
+                }
+                boolean compilSolutionsImpossibles =
+                        !(cptJoker >= 4)
+                                && !(cptJoker >= 3 && cptWagon >= 1)
+                                && !(cptJoker >= 3 && cptBateaux >= 1)
+                                && !(cptJoker >= 2 && cptWagon >= 2) && !(cptJoker >= 2 && cptBateaux >= 2)
+                                && !(cptJoker >= 2 && cptBateaux >= 1 && cptWagon >= 1)
+                                && !(cptJoker >= 1 && cptWagon >= 2 && cptBateaux >= 1)
+                                && !(cptJoker >= 1 && cptWagon >= 1 && cptBateaux >= 1)
+                                && !(cptJoker == 0 && cptBateaux >= 2 && cptWagon >= 2);
+                if (tour == 4) {
+                    int copieDeCptJoker = cptJoker;
+                    int copieDeCptWagon = cptWagon;
+                    int copieDeCptBateaux = cptBateaux;
 
+                    do {
+                        cptBateaux = copieDeCptBateaux;
+                        cptJoker = copieDeCptJoker;
+                        cptWagon = copieDeCptWagon;
+                        if (quatreCarte.size() == 4) {
+                            quatreCarte.remove(3);
+                        }
+
+                        if (quatreCarteEnString.size() == 4) {
+                            quatreCarteEnString.remove(3);
+                        }
+                        quatre = choisir("Veuillez selectionner une quatrieme carte", carteTransportsEnString, null, false);
+                        for (CarteTransport c : lesCartesPossedes) {
+                            if (quatre.equals(c.getNom())) {
+                                quatreCarte.add(c);
+                                quatreCarteEnString.add(quatre);
+                            }
+                        }
+                        if (laCouleurChoisis == null) {//
+                            for (CarteTransport c : lesCartesPossedes) {
+                                if (quatre.equals(c.getNom()) && c.getType().equals(TypeCarteTransport.JOKER) == false) {
+                                    laCouleurChoisis = c.getCouleur();
+                                }
+                            }
+
+                        }
+                    } while  ( ( quatreCarte.get(3).getAncre() == false && ( (!quatreCarte.get(3).getCouleur().equals(laCouleurChoisis)) || laCouleurChoisis == null ) ) && compilSolutionsImpossibles && (lesCouleursPaiementPossible.contains(laCouleurChoisis) || laCouleurChoisis == null));
 
                 }
-                else {
-                    String secondChoix =  choisir("Veuillez selectionner deux cartes Wagons et deux cartes Bateaux",carteTransportsEnString,null,false);
-                }
-
-
-
-
-
-
             } while (peutPasser == false);
-
-
+            for (Ville v: jeu.getPortsLibres()) {
+                if (v.getNom().equals(nomDuPort)){
+                    ports.add(v);
+                }
+            }
+            for (CarteTransport c: quatreCarte) {
+                if (c.getType().equals(TypeCarteTransport.BATEAU)){
+                    jeu.getPilesDeCartesBateau().defausser(c);
+                }
+                if (c.getType().equals(TypeCarteTransport.JOKER) || c.getType().equals(TypeCarteTransport.WAGON)){
+                    jeu.getPilesDeCartesWagon().defausser(c);
+                }
+            }
+            cartesTransportPosees.addAll(quatreCarte);
         }
 
 
-    private boolean peutPoserPort(){
-        boolean TuPeuxConstruireOuPas = false;
+    private List<Couleur> peutPoserPort(){
         if (jeu.getPortsLibres().isEmpty()){
-            return false;
+            return new ArrayList<Couleur>();
         }
         List<CarteTransport> lesCarteAncre = getCarteAncre();
         if (lesCarteAncre.size() < 4){
-            return false;
+            return new ArrayList<Couleur>();
         }
         int cptCarteWagon = 0;
         List<CarteTransport> carteWagons = new ArrayList<>();
@@ -246,58 +438,65 @@ public class Joueur {
         int cptCarteJoker = 0;
         List<CarteTransport> carteJoker = new ArrayList<>();
         for (int i = 0; i < lesCarteAncre.size(); i++) {
-            if (lesCarteAncre.get(i).getType() == TypeCarteTransport.WAGON){
+            if (lesCarteAncre.get(i).getType().equals(TypeCarteTransport.WAGON)){
                 cptCarteWagon ++;
                 carteWagons.add(lesCarteAncre.get(i));
             }
-            else if (lesCarteAncre.get(i).getType() == TypeCarteTransport.BATEAU){
+            else if (lesCarteAncre.get(i).getType().equals(TypeCarteTransport.BATEAU)){
                 cptCarteBateau ++;
                 carteBateau.add(lesCarteAncre.get(i));
-            } else if (lesCarteAncre.get(i).getType() == TypeCarteTransport.JOKER) {
+            } else if (lesCarteAncre.get(i).getType().equals(TypeCarteTransport.JOKER)){
                 cptCarteJoker ++;
                 carteJoker.add(lesCarteAncre.get(i));
             }
         }
-        if (!(cptCarteJoker >= 4) && !(cptCarteJoker >= 3 && cptCarteWagon >= 1)
+        boolean compilSolutionsImpossibles =
+                !(cptCarteJoker >= 4)
+                && !(cptCarteJoker >= 3 && cptCarteWagon >= 1)
                 && !(cptCarteJoker >= 3 && cptCarteBateau >= 1)
                 && !(cptCarteJoker >= 2 && cptCarteWagon >= 2) && !(cptCarteJoker >= 2 && cptCarteBateau >= 2)
                 && !(cptCarteJoker >= 2 && cptCarteBateau >= 1 && cptCarteWagon >= 1)
                 && !(cptCarteJoker >= 1 && cptCarteWagon >= 2 && cptCarteBateau >=1)
                 && !(cptCarteJoker >= 1 && cptCarteWagon >= 1 && cptCarteBateau >=1)
-                && !(cptCarteJoker == 0 && cptCarteBateau >=2 && cptCarteWagon >= 2))
-        {
-            return false;
+                && !(cptCarteJoker == 0 && cptCarteBateau >=2 && cptCarteWagon >= 2);
+        if (compilSolutionsImpossibles){
+            return new ArrayList<Couleur>();
         }
-        int nbCoul = 0;
-        int deuxWagons = 0;
-        int deuxBateaux = 0;
+        boolean paiementPossible = false;
+        List<Couleur> lesCouleurs = new ArrayList<>();
         List<CarteTransport> carteAUtilisé = new ArrayList<>();
         for (Couleur c: Couleur.values()) {
-            nbCoul= 0;
-            deuxWagons = 0;
-            deuxBateaux = 0;
+            cptCarteJoker = 0;
+            cptCarteBateau = 0;
+            cptCarteWagon = 0;
             if (!carteAUtilisé.isEmpty()){
                 carteAUtilisé.removeAll(carteAUtilisé);
             }
             for (CarteTransport cart: lesCarteAncre) {
-                if(cart.getCouleur() == c && cart.getType() == TypeCarteTransport.WAGON && deuxWagons < 2 ){
+                if(cart.getCouleur().equals(c) && cart.getType().equals(TypeCarteTransport.WAGON) && cptCarteWagon < 2 ){
                     carteAUtilisé.add(cart);
-                    nbCoul++;
+                    cptCarteWagon++;
                 }
-                if(cart.getCouleur() == c && cart.getType() == TypeCarteTransport.BATEAU && deuxBateaux < 2 ){
+                else if(cart.getCouleur() == c && cart.getType().equals(TypeCarteTransport.BATEAU) && cptCarteBateau< 2 ){
                     carteAUtilisé.add(cart);
-                    nbCoul++;
+                    cptCarteBateau++;
                 }
-                if (cart.getType() == TypeCarteTransport.JOKER){
+                else if (cart.getType().equals(TypeCarteTransport.JOKER)){
                     carteAUtilisé.add(cart);
+                    cptCarteJoker++;
                 }
-
             }
-            if (deuxWagons + cptCarteJoker >= 2 && deuxBateaux >= 2){
-                return true;
+            if (!compilSolutionsImpossibles){
+                lesCouleurs.add(c);
+                paiementPossible = true;
             }
         }
-        return false;
+        if (paiementPossible == true ){
+            return lesCouleurs;
+        }
+        else {
+            return new ArrayList<Couleur>();
+        }
     }
 
     /* On creer une liste vide routes pour mettre toute les routes que le joueur peut choisir
@@ -307,6 +506,17 @@ public class Joueur {
      * le joueur et on update son nombre de pions wagon/bateau , on ajoute au score et on retire les carte utilisé
      * si non, on redemande au joueur de choisir
      */
+    private List<Couleur> peutPoserRoute(String nom,int longeur){
+        Route laRoute;
+        for (Route r: jeu.getRoutesLibres()) {
+            if (r.getNom().equals(nom)){
+                laRoute = r;
+            }
+        }
+        return null;
+
+    }
+
     private void poserRoute() {
         List<String> routes = new ArrayList<>(); // liste vide
         for (Route route : this.jeu.getRoutesLibres()) { // ajout des routes possible
@@ -386,8 +596,6 @@ public class Joueur {
         }
         return maxNombreCartes;
     }
-
-
 
     /**
      * Attend une entrée de la part du joueur (au clavier ou sur la websocket) et

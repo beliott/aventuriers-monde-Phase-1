@@ -21,4 +21,8 @@ public record Ville(
     public boolean estPort() {
         return estPort;
     }
+
+    public String getNom() {
+        return nom;
+    }
 }

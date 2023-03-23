@@ -23,6 +23,7 @@ public class Jeu implements Runnable {
      * Liste des villes disponibles sur le plateau de jeu
      */
     private final List<Ville> portsLibres;
+    private final List<Ville> portsDebut;
     /**
      * Liste des routes disponibles sur le plateau de jeu
      */
@@ -68,6 +69,10 @@ public class Jeu implements Runnable {
         this.routesDebut = new ArrayList<Route>();
         for (Route r : routesLibres) {
             this.routesDebut.add(r);
+        }
+        this.portsDebut = new ArrayList<>();
+        for (Ville v: portsLibres) {
+            this.portsDebut.add(v);
         }
 
         // création des piles de pioche et défausses des cartes Transport (wagon et
@@ -118,6 +123,7 @@ public class Jeu implements Runnable {
             joueurs.add(new Joueur(nomJoueur, this, couleurs.remove(0)));
         }
         this.joueurCourant = joueurs.get(0);
+
     }
 
     public List<Joueur> getJoueurs() {
@@ -360,6 +366,7 @@ public class Jeu implements Runnable {
         }
         
     }
-
-
+    public PilesCartesTransport getPilesDeCartesWagon() {
+        return pilesDeCartesWagon;
+    }
 }
