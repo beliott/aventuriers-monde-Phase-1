@@ -18,6 +18,18 @@ public class PilesCartesTransport {
         Collections.shuffle(pilePioche);
     }
 
+    public PilesCartesTransport(PilesCartesTransport pileACopier){
+        this.pilePioche = new ArrayList<>();
+        this.pileDefausse = new ArrayList<>();
+
+        for (CarteTransport c: pileACopier.getPilePioche()) {
+            this.pilePioche.add(c);
+        }
+        for (CarteTransport c: pileACopier.getPileDefausse()) {
+            this.pileDefausse.add(c);
+        }
+    }
+
     public List<CarteTransport> getPilePioche() {
         return pilePioche;
     }

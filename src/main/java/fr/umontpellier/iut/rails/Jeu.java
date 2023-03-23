@@ -160,6 +160,7 @@ public class Jeu implements Runnable {
 
         // Début du jeu
         for (Joueur j: joueurs) {
+            joueurCourant = j;
             //cartes en main
             for (int i = 0; i < 3; i++) {
                 j.getCartesTransport().add(pilesDeCartesWagon.piocher());
@@ -177,6 +178,9 @@ public class Jeu implements Runnable {
             // le nombre de ports que chaque j peut poser est j.nbPorts (= à 3 au début du jeu dans constructeur)
 
         }
+        this.poserCartesVisibles(false);
+        joueurCourant.log(cartesTransportVisibles.toString());
+
         // jeu normal
         for (Joueur j : joueurs) {
             joueurCourant = j;
@@ -305,9 +309,9 @@ public class Jeu implements Runnable {
     public List<Route> getRoutesDebut() {
         return routesDebut;
     }
-    
+
+
     /* Fonctions cartes visibles */
-    
     public void poserUneCarteVisible(){
         ArrayList<Bouton> buttons = new ArrayList<Bouton>();
         ArrayList<String> strChoixPossibles = new ArrayList<String>();
@@ -329,42 +333,135 @@ public class Jeu implements Runnable {
             } else if (choix.equals("BATEAU")) { // pas besoin de verif car ne sort pas du choix si pas possible de tirer une carte du type ou pile vide
                 cartesTransportVisibles.add(piocherCarteBateau());
             }
+            verifierCartesVisibles(true);
         }
     }
     
-    public void poserCartesVisibles(){
-        int nbW, nbB;
+    public void poserCartesVisibles(boolean appelApresPoserUneCarte){
+        PilesCartesTransport pTempW = new PilesCartesTransport(this.pilesDeCartesWagon);
+        PilesCartesTransport pTempB = new PilesCartesTransport(this.pilesDeCartesBateau);
+        if (appelApresPoserUneCarte){ //on a encore la config donc on ajoute cartes dans pTemp pour que calculs marchent
+            for (CarteTransport cAPoser: cartesTransportVisibles) {
+                if(cAPoser.getType().equals(TypeCarteTransport.WAGON) || cAPoser.getType().equals(TypeCarteTransport.JOKER)){
+                    pTempW.defausser(cAPoser);
+                }
+                else{
+                    pTempB.defausser(cAPoser);
+                }
+            }
+        }
+        int nbW = 0, nbB = 0, cpt = 0;
+        boolean doitVerifier = false; // true si pas de melange perpetuel
         if (piocheWagonEstVide() && piocheBateauEstVide())
             return;
-        else if (pilesDeCartesBateau.getFullSize() + pilesDeCartesWagon.getFullSize() > 6){ // si + de 3 cartes dans chaque pioche
+        // ON CHANGE A PARTIR DE LA
+        else if (pTempW.getFullSize() >= 3) { // cdt 1
 
-            if (pilesDeCartesWagon.getFullSize() == 3) { // cas ou 3 wagons et 3 sont jokers
-                int cpt = 0;
-                for (CarteTransport c: pilesDeCartesWagon.getPilePioche()) {
-                    if(c.getCouleur().equals(Couleur.GRIS))
-                        cpt++;
-                }
-                for (CarteTransport c: pilesDeCartesBateau.getPileDefausse()) {
-                    if(c.getCouleur().equals(Couleur.GRIS))
-                        cpt++;
-                }
-                if (cpt != 3 ){ // si pas 3 jokers c'est bon
-                    nbW = 3;
-                    nbB = 3;
-                } else if (cpt == 3 && pilesDeCartesBateau.getFullSize() > 3){ // si on peut eviter de mettre 3 Jokers en changeant le ratio
-                    nbW = 2;
-                    nbB = 4;
-                }else { // si plus de cartes dispo pour echanger on laisse tel quel
-                    nbW = 3;
-                    nbB = 3;
-                }
-            } else if (pilesDeCartesBateau.getFullSize() == 3 && pilesDeCartesWagon.getFullSize() >= 3) {
-                // TODO : A CONTINUER
-                // if ()
+            for (CarteTransport c: pTempW.getPilePioche()) {
+                if(c.getCouleur().equals(Couleur.GRIS))
+                    cpt++;
             }
-
+            for (CarteTransport c: pTempW.getPileDefausse()) {
+                if(c.getCouleur().equals(Couleur.GRIS))
+                    cpt++;
+            } // recupere nb Jokers
+            if (pTempB.getFullSize() >= 3){ // cdt 2
+                if (pTempW.getFullSize() - cpt >= 6-(3-2)){ // cdt 4
+                    nbW = 3;
+                    nbB = 3;
+                    doitVerifier = true;
+                } else{
+                    nbW = 3;
+                    nbB = 3;
+                    doitVerifier = false;
+                }
+            }else {
+                if (pTempW.getFullSize() >= 6 - pTempB.getFullSize()){ // cdt 5
+                    if (pTempW.getFullSize() - cpt >= 6- (pTempB.getFullSize() + 2)){ // cdt 6
+                        nbB = pTempB.getFullSize();
+                        nbW = 6 - nbB;
+                        doitVerifier = true;
+                    }else {
+                        nbB = pTempB.getFullSize();
+                        nbW = 6 - nbB;
+                        doitVerifier = false;
+                    }
+                } else {
+                    nbW = pTempW.getFullSize();
+                    nbB = pTempB.getFullSize();
+                    doitVerifier = false;
+                }
+            }
         }
-        
+        else{
+            if (pTempB.getFullSize() >= 6 - pTempW.getFullSize()){ // cdt 3
+                nbW = pTempW.getFullSize();
+                nbB =  6 - nbW;
+                doitVerifier = false;
+            }else {
+                nbW = pTempW.getFullSize();
+                nbB = pTempB.getFullSize();
+                doitVerifier = false;
+            }
+        }
+        // FIN CHANGEMENTS
+        if (appelApresPoserUneCarte && !doitVerifier){
+            return;
+        }
+
+        //POSE DES CARTES
+        for (int i = 0; i < nbW; i++) {
+            cartesTransportVisibles.add(piocherCarteWagon());
+        }
+        for (int i = 0; i < nbB; i++) {
+            cartesTransportVisibles.add(piocherCarteBateau());
+        }
+        if(doitVerifier){
+            verifierCartesVisibles(false); // dans ce cas on doit verif car apres remaniement total
+        }
+    }
+
+    /**
+     * @return true si les cartes sont valides et false si on doit remélanger et appelle dans ce cas la pose de nouvelles
+     * cartes
+     * */
+    public boolean verifierCartesVisibles(boolean appelApresPoserUneCarte){
+        int cpt = 0;
+        for (CarteTransport c: cartesTransportVisibles) {
+            if (c.getCouleur().equals(Couleur.GRIS)){
+                cpt++;
+            }
+        }
+        if (cpt >= 3){
+
+            if (appelApresPoserUneCarte)
+                poserCartesVisibles(true);
+
+            else {
+                for (CarteTransport cAPoser: cartesTransportVisibles) {
+                    if(cAPoser.getType().equals(TypeCarteTransport.WAGON) || cAPoser.getType().equals(TypeCarteTransport.JOKER)){
+                        pilesDeCartesWagon.defausser(cAPoser);
+                        cartesTransportVisibles.remove(cAPoser);
+                    }
+                    else{
+                        pilesDeCartesBateau.defausser(cAPoser);
+                        cartesTransportVisibles.remove(cAPoser);
+                    }
+                }
+                poserCartesVisibles(false);}
+            return false; // a rappellé la pose des cartes car c'est pas bon.
+        }
+        return true; // c'est bon
+    }
+
+    public ArrayList<String> getNomsCartesVisibles(){
+        ArrayList<String> noms = new ArrayList<>();
+        if (!cartesTransportVisibles.isEmpty()) {
+            for (CarteTransport c : cartesTransportVisibles) {
+                noms.add(c.getNom());
+            }
+        }
+        return noms;
     }
     public PilesCartesTransport getPilesDeCartesWagon() {
         return pilesDeCartesWagon;

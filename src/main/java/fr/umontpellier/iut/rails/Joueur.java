@@ -705,7 +705,7 @@ public class Joueur {
         ArrayList<Destination> piochees = new ArrayList<Destination>();
         int nbAPiocher, nbMinAGarder;
         /* Variables pour réaliser choix */
-        ArrayList<Bouton> buttons = new ArrayList<Bouton>();
+        ArrayList<Bouton> boutonsD = new ArrayList<Bouton>();
         ArrayList<String> names = new ArrayList<String>();
         String choixRep = " ";
 
@@ -725,24 +725,19 @@ public class Joueur {
         // code
         for (int i = 0; i < nbAPiocher; i++) {
             piochees.add(jeu.getPileDestinations().remove(0));
-            buttons.add(new Bouton(piochees.get(i).toString(), piochees.get(i).getNom()));
+            boutonsD.add(new Bouton(piochees.get(i).toString(), piochees.get(i).getNom()));
             names.add(piochees.get(i).getNom());
         }
         int nbCartesGardees = piochees.size();
-        while(piochees.size() > nbMinAGarder && choixRep != ""){
-            choixRep = choisir("Quelle Destination voulez vous défausser ?", names, buttons, true);
-            if (choixRep != ""){
+        while(piochees.size() > nbMinAGarder && !choixRep.equals("")){
+            choixRep = choisir("Quelle Destination voulez vous défausser ?", names, boutonsD, true); // quelle carte defausser
+            if (!choixRep.equals("")){
                 for (Destination d :piochees) {
-                    if (Objects.equals(d.getNom(), choixRep)){
+                    if (d.getNom().equals(choixRep)){
                         jeu.getPileDestinations().add(d); // remet la carte defaussée au fond de la pile destination
-                        piochees.remove(d);
                         names.remove(d.getNom()); // enlever la carte défaussée de la liste des choix
-                        for (Bouton b :buttons) {
-
-                            if (b.valeur() == d.getNom()){
-                                buttons.remove(b);
-                            }
-                        }
+                        boutonsD.removeIf(b -> b.valeur().equals(d.getNom()));
+                        piochees.remove(d);
                         break;
                     }
                 }
@@ -1021,6 +1016,17 @@ public class Joueur {
             }
         }
         return false;
+    }
+
+    public void piocherCarteVisible(String carte){
+        for (CarteTransport c : jeu.getCartesTransportVisibles()) {
+            if (c.getNom().equals(carte)){
+                this.cartesTransport.add(c);
+                jeu.getCartesTransportVisibles().remove(c);
+                jeu.poserUneCarteVisible();
+                return;
+            }
+        }
     }
 
 }
