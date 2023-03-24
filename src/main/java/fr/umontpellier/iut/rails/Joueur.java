@@ -684,6 +684,7 @@ public class Joueur {
                 if (cptJoker + cptBateau >= longeur) {
                     lesCouleurs.add(laRoute.getCouleur());
                 }
+                return lesCouleurs;
             }
         }
 
@@ -763,21 +764,22 @@ public class Joueur {
         List<String> lesCartesEnString = new ArrayList<>(); // les cartes du paiement en string
         List<CarteTransport> lesCartes = new ArrayList<>(); // les cartes du paiement
         boolean paiementPossible = false;
+        boolean utile = false;
         int argent = 0;
 
 
         if (laRoute.estMaritime()) {
             for (CarteTransport c : this.cartesTransport) {
-                if (c.getType().equals(TypeCarteTransport.JOKER) || c.getType().equals(TypeCarteTransport.BATEAU)){
+                if ((c.getType().equals(TypeCarteTransport.JOKER)&& lesCouleursPaiementPossible.contains(c.getCouleur())) || (c.getType().equals(TypeCarteTransport.BATEAU)) && lesCouleursPaiementPossible.contains(c.getCouleur())){
                     carteTransportsEnString.add(c.getNom());
                 }
             }
             do { argent = 0;
                 Couleur laCouleurChoisis = null;
-                    do {
+                    do { utile = false;
                         un = choisir("Veuillez selectionner des cartes Wagons pour capturer la route", carteTransportsEnString, null, false);
                         for (CarteTransport c : lesCartesPossedes) {
-                            if (un.equals(c.getNom()) && c.getType().equals(TypeCarteTransport.BATEAU) || c.getType().equals(TypeCarteTransport.JOKER) && (lesCouleursPaiementPossible.contains(laCouleurChoisis) || laCouleurChoisis == null)  ) {
+                                if (un.equals(c.getNom()) && (c.getType().equals(TypeCarteTransport.BATEAU) || c.getType().equals(TypeCarteTransport.JOKER)) && (( c.getCouleur().equals(laCouleurChoisis) &&lesCouleursPaiementPossible.contains(laCouleurChoisis)) || laCouleurChoisis == null)  ) {
                                 lesCartesEnString.add(un);
                                 lesCartes.add(c);
                                 tour++;
@@ -787,20 +789,22 @@ public class Joueur {
                                 else {
                                     argent++;
                                 }
+                                this.cartesTransportPosees.add(c);
                                 carteTransportsEnString.remove(un);
+                                utile = true;
                             }
                         }
-                        if (!carteTransportsEnString.isEmpty()){
+                        if (!carteTransportsEnString.isEmpty() && utile){
                             carteTransportsEnString.remove(un);
                         }
-                        if (laCouleurChoisis == null) {
+                        if (laCouleurChoisis == null && utile) {
                             for (CarteTransport c : lesCartesPossedes) {
                                 if (un.equals(c.getNom()) && c.getType().equals(TypeCarteTransport.JOKER) == false) {
                                     laCouleurChoisis = c.getCouleur();
                                 }
                             }
                         }
-                        if (argent >= laRoute.getLongueur()){
+                        if (argent >= laRoute.getLongueur() && utile){
                             paiementPossible = true;
                         }
                     } while ((lesCouleursPaiementPossible.contains(laCouleurChoisis) || laCouleurChoisis == null) && !paiementPossible );
@@ -811,10 +815,10 @@ public class Joueur {
 
         }
 
-        if (laRoute.estTerrestre()){
+        else if (laRoute.estTerrestre()){
 
         }
-        if (laRoute.estPair()){
+        else if (laRoute.estPair()){
 
         }
 
@@ -830,6 +834,7 @@ public class Joueur {
                 jeu.getPilesDeCartesWagon().defausser(carte);
             }
         }
+        this.cartesTransportPosees.clear();
         score += laRoute.getScore();
     }
 

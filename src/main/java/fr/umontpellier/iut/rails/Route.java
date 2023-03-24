@@ -104,10 +104,4 @@ public abstract class Route {
         return String.format("%s - %s", ville1.nom(), ville2.nom());
     }
 
-    public ArrayList<Route> genererFilsRoute(){
-        ArrayList<Route> routeRes = new ArrayList<>();
-        return null;
-    }
-
-
 }
