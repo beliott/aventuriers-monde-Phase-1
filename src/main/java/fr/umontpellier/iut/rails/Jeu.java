@@ -31,9 +31,10 @@ public class Jeu implements Runnable {
     private final List<Route> routesDebut;
 
     /**
-     * TOUTES LES CARTES
+     * TOUTES LES CARTES, TTES LES VILLES, TTES LES ROUTES
      * */
     private final List<CarteTransport> allCartesTransports;
+    private final List<Ville> allVilles;
 
     /**
      * Pile de pioche et défausse des cartes wagon
@@ -136,8 +137,13 @@ public class Jeu implements Runnable {
             joueurs.add(new Joueur(nomJoueur, this, couleurs.remove(0)));
         }
         this.joueurCourant = joueurs.get(0);
+
         this.allCartesTransports = new ArrayList<>();
         this.allCartesTransports.addAll(toutesCartesTransport);
+
+        this.allVilles = new ArrayList<>();
+        this.allVilles.addAll(portsLibres);
+
     }
 
     public CarteTransport getCarteByNom(String nom){
@@ -145,6 +151,21 @@ public class Jeu implements Runnable {
             if (c.getNom().equals(nom)){
                 return c;
             }
+        }
+        return null;
+    }
+    public Ville getVillebyNom(String nom){
+        for (Ville v  : allVilles) {
+            if (v.getNom().equals(nom))
+                return v;
+        }
+        return null;
+    }
+
+    public Route getRoutebyNom(String nom){
+        for (Route r  : routesDebut) {
+            if (r.getNom().equals(nom))
+                return r;
         }
         return null;
     }
@@ -184,6 +205,7 @@ public class Jeu implements Runnable {
         // IMPORTANT : Le corps de cette fonction est à réécrire entièrement
         // Un exemple très simple est donné pour illustrer l'utilisation de certaines méthodes
 
+        this.poserCartesVisibles(false);
         // Début du jeu
         for (Joueur j: joueurs) {
             joueurCourant = j;
@@ -204,7 +226,6 @@ public class Jeu implements Runnable {
             // le nombre de ports que chaque j peut poser est j.nbPorts (= à 3 au début du jeu dans constructeur)
 
         }
-        this.poserCartesVisibles(false);
 
         // jeu normal
         for (Joueur j : joueurs) {

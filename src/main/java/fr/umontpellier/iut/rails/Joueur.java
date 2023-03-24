@@ -1,9 +1,7 @@
 package fr.umontpellier.iut.rails;
 
-import fr.umontpellier.iut.rails.Route;
 import fr.umontpellier.iut.rails.data.*;
 
-import java.lang.reflect.Type;
 import java.util.*;
 
 public class Joueur {
@@ -27,7 +25,7 @@ public class Joueur {
      * Liste des villes sur lesquelles le joueur a construit un port
      */
     private final List<Ville> ports;
-    private int nbPorts;
+    private int nbPortsPeutPoser;
     /**
      * Liste des routes capturées par le joueur
      */
@@ -72,7 +70,7 @@ public class Joueur {
         this.jeu = jeu;
         this.couleur = couleur;
         this.ports = new ArrayList<>();
-        this.nbPorts = 3;
+        this.nbPortsPeutPoser = 3;
         this.routes = new ArrayList<>();
         this.nbPionsWagon = 0;
         this.nbPionsWagonEnReserve = 25;
@@ -139,9 +137,27 @@ public class Joueur {
             }
             if (cptActions == 2){ // Actions réalisables 1 fois par tour
 
-                for (Ville ville : jeu.getPortsLibres()) { // TODO : OPTIMISER POUR NE METTRE QUE LES POTENTIELS PORTS POUR LE JOUEUR ACTUEL
-                    options.add(ville.nom());
-                } // POUR BATIR PORT
+
+                if (nbPortsPeutPoser > 0){
+                    for (Ville v : jeu.getPortsLibres()) { // TODO : CHECKER SI CA MARCHE
+                        if (!peutPoserPort(v.getNom()).isEmpty())
+                            options.add(v.nom());
+                    }
+                }// POUR BATIR PORT
+
+                for (Route r : jeu.getRoutesLibres()){ // TODO : CHECKER SI CA MARCHE
+                    if (!peutPoserRoute(r.getNom(), r.getLongueur()).isEmpty()){
+                        if (r instanceof RouteMaritime){
+                            if (nbPionsBateau >= r.getLongueur()){
+                                options.add(r.getNom());
+                            }
+                        } else {
+                            if (nbPionsWagon >= r.getLongueur()){
+                                options.add(r.getNom());
+                            }
+                        }
+                    }
+                } // POUR POSER ROUTE
 
                 if (!jeu.getPileDestinations().isEmpty()){
                     options.add("DESTINATION");
@@ -158,7 +174,7 @@ public class Joueur {
                     boutons.add(new Bouton("Echanger des pions Bateau", "PIONS BATEAU"));
                 } // POUR ECHANGER PIONS BATEAU
 
-                // TODO : AJOUTER LES ROUTES QUE L'ON PEUT CAPTURER
+
 
             }
            /*####################################################
@@ -206,6 +222,16 @@ public class Joueur {
                 } else if (choix.equals("DESTINATION")) {
                     prendreDestinations(false);
                     cptActions = 0;
+                } else if (jeu.getPortsLibres().contains(jeu.getVillebyNom(choix))) { // TODO : CHECKER SI CA MARCHE
+                    poserPort(choix);
+                    nbPortsPeutPoser--;
+                } else if (jeu.getRoutesLibres().contains(jeu.getRoutebyNom(choix))) { // TODO : CHECKER SI CA MARCHE
+                    poserRoute(choix);
+                    if (jeu.getRoutebyNom(choix) instanceof RouteMaritime){
+                        nbPionsBateau -= jeu.getRoutebyNom(choix).getLongueur();
+                    } else{
+                        nbPionsWagon -= jeu.getRoutebyNom(choix).getLongueur();
+                    }
                 }
 
 
