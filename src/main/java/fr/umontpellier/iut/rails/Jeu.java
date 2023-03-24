@@ -209,16 +209,6 @@ public class Jeu implements Runnable {
         // Début du jeu
         for (Joueur j: joueurs) {
             joueurCourant = j;
-            //cartes en main
-            for (int i = 0; i < 3; i++) {
-                j.getCartesTransport().add(pilesDeCartesWagon.piocher());
-            }
-            for (int i = 0; i < 7; i++) {
-                j.getCartesTransport().add(pilesDeCartesBateau.piocher());
-            }
-            // pions ajout
-            j.setNbPionsBateau(50);
-            j.setNbPionsWagon(25);
             //prendre cartes Destination
             j.prendreDestinations(true);
             // changement ratio pions
@@ -228,10 +218,43 @@ public class Jeu implements Runnable {
         }
 
         // jeu normal
-        for (Joueur j : joueurs) {
-            joueurCourant = j;
-            j.jouerTour();
+        boolean finAnnoncee = false;
+        while (getMinPionsJoueurs() > 6){
+            for (Joueur j : joueurs) {
+                joueurCourant = j;
+                joueurCourant.jouerTour();
+                if (finAnnoncee){
+                    joueurCourant.incrementerNbToursFin();
+                }
+                if (joueurCourant.getSommePions() <= 6 && !finAnnoncee){
+                    finAnnoncee = true;
+                }
+            }
         }
+        // 2 TOURS FIN DE JEU
+        for (int i = 0; i < 2; i++) {
+            for (Joueur j : joueurs) {
+                joueurCourant = j;
+                if (joueurCourant.getNbToursFin() >= 2){
+                    continue;
+                }
+                joueurCourant.jouerTour();
+                if (finAnnoncee){
+                    joueurCourant.incrementerNbToursFin();
+                }
+            }
+        }
+
+        // CALCUL DU GAGNANT
+        int meilleurscore = joueurs.get(0).calculerScoreFinal() - 1;
+        Joueur gagnant = null;
+        for (Joueur j: joueurs) {
+            if (meilleurscore < j.calculerScoreFinal()){
+                meilleurscore = j.calculerScoreFinal();
+                gagnant = j;
+            }
+        }
+        log(String.format("Le joueur qui remporte la partie est %s !!!", gagnant.getNom()));
         // Fin de la partie
         prompt("Fin de la partie.", new ArrayList<>(), true);
     }
@@ -343,7 +366,7 @@ public class Jeu implements Runnable {
 
 
     public PilesCartesTransport getPilesDeCartesBateau() {
-        return null;
+        return this.pilesDeCartesBateau;
     }
 
     public ArrayList<Route> genererFilsRoute(){
@@ -354,6 +377,16 @@ public class Jeu implements Runnable {
 
     public List<Route> getRoutesDebut() {
         return routesDebut;
+    }
+
+    public int getMinPionsJoueurs(){
+        int nbMinPions = joueurs.get(0).getSommePions() + 1;
+        for (Joueur j: joueurs) {
+            if (j.getSommePions() < nbMinPions){
+                nbMinPions = j.getSommePions();
+            }
+        }
+        return nbMinPions;
     }
 
 
