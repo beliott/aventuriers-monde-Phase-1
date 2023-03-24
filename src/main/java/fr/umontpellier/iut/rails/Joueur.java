@@ -895,7 +895,7 @@ public class Joueur {
 
         } else if (laRoute.estTerrestre()) {
             for (CarteTransport c : this.cartesTransport) {
-                if ((c.getType().equals(TypeCarteTransport.JOKER) && lesCouleursPaiementPossible.contains(c.getCouleur())) || (c.getType().equals(TypeCarteTransport.BATEAU)) && lesCouleursPaiementPossible.contains(c.getCouleur())) {
+                if ((c.getType().equals(TypeCarteTransport.JOKER) && lesCouleursPaiementPossible.contains(c.getCouleur())) || (c.getType().equals(WAGON)) && lesCouleursPaiementPossible.contains(c.getCouleur())) {
                     carteTransportsEnString.add(c.getNom());
                 }
             }
@@ -938,7 +938,7 @@ public class Joueur {
 
         } else if (laRoute.estPair()) {
             for (CarteTransport c : this.cartesTransport) {
-                if ((c.getType().equals(TypeCarteTransport.JOKER) && lesCouleursPaiementPossible.contains(c.getCouleur())) || (c.getType().equals(TypeCarteTransport.BATEAU)) && lesCouleursPaiementPossible.contains(c.getCouleur())) {
+                if ((c.getType().equals(TypeCarteTransport.JOKER) && lesCouleursPaiementPossible.contains(c.getCouleur())) || (c.getType().equals(WAGON)) && lesCouleursPaiementPossible.contains(c.getCouleur())) {
                     carteTransportsEnString.add(c.getNom());
                 }
             }
@@ -978,17 +978,17 @@ public class Joueur {
                 }
             } while (peutPasser == false);
             // TODO ici
-
-            if (laRoute.estTerrestre() || laRoute.estPair()) {
-                for (CarteTransport carte : lesCartes) {
-                    jeu.getPilesDeCartesBateau().defausser(carte);
-                }
-            } else {
-                for (CarteTransport carte : lesCartes) {
-                    jeu.getPilesDeCartesWagon().defausser(carte);
-                }
+        }
+        if (laRoute.estTerrestre() || laRoute.estPair()) {
+            for (CarteTransport carte : lesCartes) {
+                jeu.getPilesDeCartesBateau().defausser(carte);
+            }
+        } else {
+            for (CarteTransport carte : lesCartes) {
+                jeu.getPilesDeCartesWagon().defausser(carte);
             }
         }
+
         this.routes.add(laRoute);
         jeu.getRoutesLibres().remove(laRoute);
 
@@ -1313,7 +1313,7 @@ public class Joueur {
         for (int i = 0; i < this.destinations.size() ; i++) {
             if (destinationEstComplete(this.destinations.get(i))){
                 if (destinations.get(i).estCarteItineraires(destinations.get(i))){  // carte itineraire
-                    cpt += this.destinations.get(i).getValeurMax();
+                    cpt += this.destinations.get(i).getValeurSimple();
                 }
                 else {
                     cpt += this.destinations.get(i).getValeurSimple();
