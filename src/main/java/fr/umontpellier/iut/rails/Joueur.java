@@ -106,81 +106,130 @@ public class Joueur {
     void jouerTour() {
         // IMPORTANT : Le corps de cette fonction est à réécrire entièrement
         // Un exemple très simple est donné pour illustrer l'utilisation de certaines méthodes
-        List<String> optionsVilles = new ArrayList<>();
-        for (Ville ville : jeu.getPortsLibres()) {
-            optionsVilles.add(ville.nom());
-        }
         ArrayList<String> options = new ArrayList<>();
-        options.add("WAGON");
-        options.add("BATEAU");
-        options.add("DESTINATION");
-        options.add("PIONS WAGON");
-        options.add("PIONS BATEAU");
-        for (int i = 0; i < jeu.getRoutesLibres().size(); i++) {
-            options.add(jeu.getRoutesLibres().get(i).getNom());
-        }
-        for (int i = 0; i < jeu.getPortsLibres().size(); i++) {
-            options.add(jeu.getPortsLibres().get(i).nom());
-        }
-        for (int i = 0; i < jeu.getCartesTransportVisibles().size(); i++) {
-            options.add(jeu.getCartesTransportVisibles().get(i).getNom());
-        }
+        List<Bouton> boutons = new ArrayList<>();
+        int cptActions = 2;
 
-        System.out.println(optionsVilles);
-        List <Bouton> boutonsPioche = Arrays.asList(
-                new Bouton("Piocher une carte bateau"),
-                new Bouton("Piocher une carte wagon"));
-        List<Bouton> boutons = Arrays.asList(
-                new Bouton("Piocher dans une des piles"),
-                new Bouton("Piocher une carte Destination"),
-                new Bouton("Prendre Possession d'une route"),
-                new Bouton("Bâtir un port"),
-                new Bouton("Echanger des pions"),
-                new Bouton("Prendre une carte visible"));
-        String choix = choisir(
-                "Que voulez vous faire ?",
-                null,
-                boutons,
-                true);
+        while (cptActions > 0){
+            options.clear();
+            boutons.clear();
 
-        if (choix.equals("")) {
-            log(String.format("%s ne souhaite rien faire", toLog()));
-        } else {
-            log(String.format("%s a choisi %s", toLog(), choix));
-        }
-        if (choix.equals(boutons.get(0))){
-            log(String.format("%s pioche dans une des piles"));
-            choisir("Que voulez vous piocher",null,boutonsPioche,true);
-            if (choix.equals(boutonsPioche.get(0))){
-                jeu.piocherCarteBateau();
+            /*####################################################
+             ################### CHOIX POSSIBLES #################
+             ####################################################*/
+
+            if (cptActions >= 1){ // Actions réalisables 2 fois par tour
+
+                for (CarteTransport c: jeu.getCartesTransportVisibles()) {
+                    if (!(cptActions == 1 && c.getType().equals(TypeCarteTransport.JOKER))){ // on prend pas les cartes J au t2
+                        options.add(c.getNom());
+                    }
+                } // POUR CARTES VISIBLES
+
+                if (!jeu.piocheWagonEstVide()){
+                    options.add("WAGON");
+                    boutons.add(new Bouton("Piocher une Carte Wagon", "WAGON"));
+                } // POUR PILE CARTES TRANSPORT WAGON
+
+                if (!jeu.piocheBateauEstVide()){
+                    options.add("BATEAU");
+                    boutons.add(new Bouton("Piocher une Carte Bateau", "BATEAU"));
+                } // POUR PILE CARTES TRANSPORT BATEAU
+
             }
-            if (choix.equals(boutonsPioche.get(1))){
-                jeu.piocherCarteWagon();
-            }
+            if (cptActions == 2){ // Actions réalisables 1 fois par tour
 
-        }
-        if (choix.equals("Prendre Possession d'une route")){
-            poserRoute();
-        }
-        /* exemple port utilisation (a changer comme bon te semble) */
-        if (choix.equals("Bâtir un port")){
-            if (!peutPoserPort().isEmpty()) { // verifie si il a les cartes pour poser un port
-                String exemple = null;
-                for (Ville v : lesVillescapturésParleJoueur()) { // ville ou il y a au moins une route du joueur a côté
-                    if (v.getNom().equals(exemple)) {
-                        poserPort(exemple);
+                for (Ville ville : jeu.getPortsLibres()) { // TODO : OPTIMISER POUR NE METTRE QUE LES POTENTIELS PORTS POUR LE JOUEUR ACTUEL
+                    options.add(ville.nom());
+                } // POUR BATIR PORT
+
+                if (!jeu.getPileDestinations().isEmpty()){
+                    options.add("DESTINATION");
+                    boutons.add(new Bouton("Piocher une carte Destination", "DESTINATION"));
+                } // POUR PIOCHER DESTINATION
+
+                if (nbPionsWagonEnReserve >= 1 && nbPionsBateau >= 1){
+                    options.add("PIONS WAGON");
+                    boutons.add(new Bouton("Echanger des pions Wagon", "PIONS WAGON"));
+                } // POUR ECHANGER PIONS WAGON
+
+                if (nbPionsBateauEnReserve >= 1 && nbPionsWagon >= 1){
+                    options.add("PIONS BATEAU");
+                    boutons.add(new Bouton("Echanger des pions Bateau", "PIONS BATEAU"));
+                } // POUR ECHANGER PIONS BATEAU
+
+                // TODO : AJOUTER LES ROUTES QUE L'ON PEUT CAPTURER
+
+            }
+           /*####################################################
+             ################# FAIRE LE CHOIX ###################
+             ####################################################*/
+
+            String choix = choisir(
+                    "Que voulez vous faire ?",
+                    options,
+                    boutons,
+                    true);
+
+            /*####################################################
+             ################# APPEL DU CHOIX ####################
+             ####################################################*/
+
+            if (choix.equals("")) { // A CHOISI DE PASSER
+
+                log(String.format("%s ne souhaite rien faire", toLog()));
+                return;
+
+
+            } else { // A FAIT UN CHOIX
+
+                log(String.format("%s a choisi %s", toLog(), choix));
+
+                if (choix.equals("WAGON")){ // ACTIONS COUTANT 1
+                    this.cartesTransport.add(jeu.piocherCarteWagon());
+                    cptActions -= 1;
+                } else if (choix.equals("BATEAU")) {
+                    this.cartesTransport.add(jeu.piocherCarteBateau());
+                    cptActions -= 1;
+                } else if (jeu.getCartesTransportVisibles().contains(jeu.getCarteByNom(choix))) { // si choix rpz carteVisible
+                    if (jeu.getCarteByNom(choix).getType().equals(TypeCarteTransport.JOKER)){
+                        piocherCarteVisible(choix);
+                        cptActions = 0; // piocher un joker visible empeche de repiocher apres
+                    } else {
+                        cptActions -= 1;
+                        piocherCarteVisible(choix);
+                    }
+
+                } else if (choix.equals("PIONS WAGON") || choix.equals("PIONS BATEAU")) { // ACTIONS COUTANT 2
+                    echangerPions(choix);
+                    cptActions = 0;
+                } else if (choix.equals("DESTINATION")) {
+                    prendreDestinations(false);
+                    cptActions = 0;
+                }
+
+
+                /* exemple port utilisation (a changer comme bon te semble) */
+                if (choix.equals("Bâtir un port")){
+                    if (!peutPoserPort().isEmpty()) { // verifie si il a les cartes pour poser un port
+                        String exemple = null;
+                        for (Ville v : lesVillescapturésParleJoueur()) { // ville ou il y a au moins une route du joueur a côté
+                            if (v.getNom().equals(exemple)) {
+                                poserPort(exemple);
+                            }
+                        }
                     }
                 }
-            }
-        }
 
         /*
         if (choix.equals(boutons.get(1))){
             Destination choisis = jeu.getPileDestinations().get(genererInt(0,jeu.getPileDestinations().size()));
             destinations.add(choisis);
            */
-
+            }
         }
+    }
+
 
         private void poserPort(String nomDuPort) {
             if (this.cartesTransport.isEmpty()) {
@@ -1022,10 +1071,51 @@ public class Joueur {
         for (CarteTransport c : jeu.getCartesTransportVisibles()) {
             if (c.getNom().equals(carte)){
                 this.cartesTransport.add(c);
-                jeu.getCartesTransportVisibles().remove(c);
                 jeu.poserUneCarteVisible();
+                jeu.cartesTransportVisibles().remove(jeu.getCarteByNom(carte));
                 return;
             }
+        }
+    }
+
+    public void echangerPions(String type){
+        int nbMaxAPiocher;
+        ArrayList<String> nbPeutPiocher = new ArrayList<>();
+
+        if (type.equals("PIONS WAGON")){
+            if (nbPionsWagonEnReserve >= nbPionsBateau)
+            nbMaxAPiocher = nbPionsBateau;
+            else nbMaxAPiocher = nbPionsWagonEnReserve;
+
+            for (int i = 1; i <= nbMaxAPiocher; i++) {
+                nbPeutPiocher.add(Integer.toString(i));
+            }
+            String choix = choisir("Combien de pions voulez vous échanger", nbPeutPiocher, null, false);
+            // On échange les points
+            nbPionsWagonEnReserve -= Integer.parseInt(choix);
+            nbPionsBateau -= Integer.parseInt(choix);
+            nbPionsWagon += Integer.parseInt(choix);
+            nbPionsBateauEnReserve += Integer.parseInt(choix);
+            // On déduit du score
+            score -= Integer.parseInt(choix);
+        }
+        else{
+            if (nbPionsBateauEnReserve >= nbPionsWagon)
+                nbMaxAPiocher = nbPionsWagon;
+            else nbMaxAPiocher = nbPionsBateauEnReserve;
+
+            for (int i = 1; i <= nbMaxAPiocher; i++) {
+                nbPeutPiocher.add(Integer.toString(i));
+            }
+            String choix = choisir("Combien de pions voulez vous échanger", nbPeutPiocher, null, false);
+            // On échange les points
+            nbPionsWagonEnReserve += Integer.parseInt(choix);
+            nbPionsBateau += Integer.parseInt(choix);
+            nbPionsWagon -= Integer.parseInt(choix);
+            nbPionsBateauEnReserve -= Integer.parseInt(choix);
+            // On déduit du score
+            score -= Integer.parseInt(choix);
+
         }
     }
 

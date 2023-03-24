@@ -59,6 +59,8 @@ public final class CarteTransport implements Comparable<CarteTransport> {
         return String.format("%s %s (%s)", label, couleur.name(), nom);
     }
 
+
+
     public String toLog() {
         String label;
         if (type == TypeCarteTransport.JOKER) {

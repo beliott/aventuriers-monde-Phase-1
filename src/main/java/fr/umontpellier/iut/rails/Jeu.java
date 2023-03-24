@@ -29,6 +29,12 @@ public class Jeu implements Runnable {
      */
     private final List<Route> routesLibres;
     private final List<Route> routesDebut;
+
+    /**
+     * TOUTES LES CARTES
+     * */
+    private final List<CarteTransport> allCartesTransports;
+
     /**
      * Pile de pioche et défausse des cartes wagon
      */
@@ -79,6 +85,7 @@ public class Jeu implements Runnable {
         // bateau)
         ArrayList<CarteTransport> cartesWagon = new ArrayList<>();
         ArrayList<CarteTransport> cartesBateau = new ArrayList<>();
+        ArrayList<CarteTransport> toutesCartesTransport = new ArrayList<>();
         for (Couleur c : Couleur.values()) {
             if (c == Couleur.GRIS) {
                 continue;
@@ -104,6 +111,12 @@ public class Jeu implements Runnable {
             // Cartes wagon joker
             cartesWagon.add(new CarteTransport(TypeCarteTransport.JOKER, Couleur.GRIS, false, true));
         }
+        for (CarteTransport c: cartesBateau) {
+            toutesCartesTransport.add(c);
+        }
+        for (CarteTransport c: cartesWagon) {
+            toutesCartesTransport.add(c);
+        }
         pilesDeCartesWagon = new PilesCartesTransport(cartesWagon);
         pilesDeCartesBateau = new PilesCartesTransport(cartesBateau);
 
@@ -123,7 +136,17 @@ public class Jeu implements Runnable {
             joueurs.add(new Joueur(nomJoueur, this, couleurs.remove(0)));
         }
         this.joueurCourant = joueurs.get(0);
+        this.allCartesTransports = new ArrayList<>();
+        this.allCartesTransports.addAll(toutesCartesTransport);
+    }
 
+    public CarteTransport getCarteByNom(String nom){
+        for (CarteTransport c : allCartesTransports) {
+            if (c.getNom().equals(nom)){
+                return c;
+            }
+        }
+        return null;
     }
 
     public List<Joueur> getJoueurs() {
@@ -140,6 +163,9 @@ public class Jeu implements Runnable {
 
     public List<CarteTransport> getCartesTransportVisibles() {
         return new ArrayList<>(cartesTransportVisibles);
+    }
+    public List<CarteTransport> cartesTransportVisibles() {
+        return this.cartesTransportVisibles;
     }
 
     public List<Destination> getPileDestinations() {
@@ -179,7 +205,6 @@ public class Jeu implements Runnable {
 
         }
         this.poserCartesVisibles(false);
-        joueurCourant.log(cartesTransportVisibles.toString());
 
         // jeu normal
         for (Joueur j : joueurs) {
@@ -312,6 +337,8 @@ public class Jeu implements Runnable {
 
 
     /* Fonctions cartes visibles */
+
+    // TODO : reussir tests initialisation des cartes visibles meme si marche en vrai
     public void poserUneCarteVisible(){
         ArrayList<Bouton> buttons = new ArrayList<Bouton>();
         ArrayList<String> strChoixPossibles = new ArrayList<String>();
@@ -341,7 +368,9 @@ public class Jeu implements Runnable {
         PilesCartesTransport pTempW = new PilesCartesTransport(this.pilesDeCartesWagon);
         PilesCartesTransport pTempB = new PilesCartesTransport(this.pilesDeCartesBateau);
         if (appelApresPoserUneCarte){ //on a encore la config donc on ajoute cartes dans pTemp pour que calculs marchent
-            for (CarteTransport cAPoser: cartesTransportVisibles) {
+            CarteTransport cAPoser;
+            for (int i = 0; i < cartesTransportVisibles.size(); i++) {
+                cAPoser = cartesTransportVisibles.get(0);
                 if(cAPoser.getType().equals(TypeCarteTransport.WAGON) || cAPoser.getType().equals(TypeCarteTransport.JOKER)){
                     pTempW.defausser(cAPoser);
                 }
@@ -358,11 +387,11 @@ public class Jeu implements Runnable {
         else if (pTempW.getFullSize() >= 3) { // cdt 1
 
             for (CarteTransport c: pTempW.getPilePioche()) {
-                if(c.getCouleur().equals(Couleur.GRIS))
+                if(c.getType().equals(TypeCarteTransport.JOKER))
                     cpt++;
             }
             for (CarteTransport c: pTempW.getPileDefausse()) {
-                if(c.getCouleur().equals(Couleur.GRIS))
+                if(c.getType().equals(TypeCarteTransport.JOKER))
                     cpt++;
             } // recupere nb Jokers
             if (pTempB.getFullSize() >= 3){ // cdt 2
@@ -428,7 +457,7 @@ public class Jeu implements Runnable {
     public boolean verifierCartesVisibles(boolean appelApresPoserUneCarte){
         int cpt = 0;
         for (CarteTransport c: cartesTransportVisibles) {
-            if (c.getCouleur().equals(Couleur.GRIS)){
+            if (c.getType().equals(TypeCarteTransport.JOKER)){
                 cpt++;
             }
         }
@@ -436,9 +465,10 @@ public class Jeu implements Runnable {
 
             if (appelApresPoserUneCarte)
                 poserCartesVisibles(true);
-
             else {
-                for (CarteTransport cAPoser: cartesTransportVisibles) {
+                CarteTransport cAPoser;
+                for (int i = 0; i < cartesTransportVisibles.size(); i++) {
+                    cAPoser = cartesTransportVisibles.get(0);
                     if(cAPoser.getType().equals(TypeCarteTransport.WAGON) || cAPoser.getType().equals(TypeCarteTransport.JOKER)){
                         pilesDeCartesWagon.defausser(cAPoser);
                         cartesTransportVisibles.remove(cAPoser);
