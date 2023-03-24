@@ -17,7 +17,9 @@ import fr.umontpellier.iut.rails.data.Couleur;
 import fr.umontpellier.iut.rails.data.Destination;
 import fr.umontpellier.iut.rails.data.TypeCarteTransport;
 import fr.umontpellier.iut.rails.data.Ville;
+import org.junit.jupiter.api.Timeout;
 
+@Timeout(value = 1, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
 public class JoueurProfTest {
     private IOJeu jeu;
     private List<CarteTransport> piocheWagon;
@@ -71,6 +73,14 @@ public class JoueurProfTest {
         TestUtils.setAttribute(joueur1, "nbPionsWagonEnReserve", 5);
         TestUtils.setAttribute(joueur1, "nbPionsBateau", 40);
         TestUtils.setAttribute(joueur1, "nbPionsBateauEnReserve", 10);
+
+        // initialisation des cartes visibles
+        cartesTransportVisibles.add(jeu.piocherCarteWagon());
+        cartesTransportVisibles.add(jeu.piocherCarteWagon());
+        cartesTransportVisibles.add(jeu.piocherCarteWagon());
+        cartesTransportVisibles.add(jeu.piocherCarteBateau());
+        cartesTransportVisibles.add(jeu.piocherCarteBateau());
+        cartesTransportVisibles.add(jeu.piocherCarteBateau());
     }
 
     @Test
