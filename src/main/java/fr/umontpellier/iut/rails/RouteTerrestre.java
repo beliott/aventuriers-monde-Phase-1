@@ -14,4 +14,9 @@ public class RouteTerrestre extends Route {
     public boolean estTerrestre(){
         return true;
     }
+
+    @Override
+    public boolean estPair() {
+        return false;
+    }
 }

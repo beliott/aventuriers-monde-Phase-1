@@ -101,5 +101,7 @@ public final class CarteTransport implements Comparable<CarteTransport> {
         return ancre;
     }
 
-
+    public boolean isEstDouble() {
+        return estDouble;
+    }
 }

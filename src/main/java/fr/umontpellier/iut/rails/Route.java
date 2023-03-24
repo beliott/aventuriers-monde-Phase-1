@@ -9,6 +9,7 @@ import java.util.ArrayList;
 public abstract class Route {
     public abstract boolean estMaritime();
     public abstract boolean estTerrestre();
+    public abstract boolean estPair();
     /**
      * Première extrémité
      */

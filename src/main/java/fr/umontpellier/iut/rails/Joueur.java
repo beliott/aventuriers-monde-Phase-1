@@ -555,15 +555,160 @@ public class Joueur {
      * le joueur et on update son nombre de pions wagon/bateau , on ajoute au score et on retire les carte utilisé
      * si non, on redemande au joueur de choisir
      */
-    private List<Couleur> peutPoserRoute(String nom,int longeur){
-        Route laRoute;
-        for (Route r: jeu.getRoutesLibres()) {
-            if (r.getNom().equals(nom)){
+    private List<Couleur> peutPoserRoute(String nom,int longeur) {
+        Route laRoute = null; // route surlaquel on veut poser
+        for (Route r : jeu.getRoutesLibres()) {
+            if (r.getNom().equals(nom)) {
                 laRoute = r;
             }
         }
-        return null;
+        if (lesVillescapturésParleJoueur().contains(laRoute) == false) {
+            return null;
+        }
 
+        if (laRoute.estPair()) {
+            if (laRoute.getCouleur().equals(Couleur.GRIS)) { // on peut jouer nimporte quel couleur
+                List<Couleur> lesCouleurs = new ArrayList<>();
+                List<CarteTransport> carteAUtilisé = new ArrayList<>();
+                int cptWagon = 0;
+                int cptJoker = 0;
+                for (Couleur c : Couleur.values()) {
+                    cptWagon = 0;
+                    cptJoker = 0;
+                    for (CarteTransport cart : cartesTransport) {
+                        if (cart.getCouleur().equals(c) && cart.getType().equals(TypeCarteTransport.WAGON)) {
+                            cptWagon++;
+                        } else if (cart.getType().equals(TypeCarteTransport.JOKER)) {
+                            cptJoker++;
+                        }
+
+                    }
+                    if (cptJoker + cptWagon >= longeur*2) {
+                        lesCouleurs.add(c);
+                    }
+                }
+                return lesCouleurs;
+            }
+            else { // la route n'est pas grise
+
+                List<Couleur> lesCouleurs = new ArrayList<>();
+                List<CarteTransport> carteAUtilisé = new ArrayList<>();
+                int cptWagon = 0;
+                int cptJoker = 0;
+                for (CarteTransport cart : cartesTransport) {
+                    if (cart.getCouleur().equals(laRoute.getCouleur()) && cart.getType().equals(TypeCarteTransport.WAGON)) {
+                        cptWagon++;
+                    } else if (cart.getType().equals(TypeCarteTransport.JOKER)) {
+                        cptJoker++;
+                    }
+
+                }
+                if (cptJoker + cptWagon >= longeur*2) {
+                    lesCouleurs.add(laRoute.getCouleur());
+                }
+                return lesCouleurs;
+            }
+
+
+        }
+
+
+        if (laRoute.estMaritime()) {
+            if (laRoute.getCouleur().equals(Couleur.GRIS)) { // on peut jouer nimporte quel couleur
+                List<Couleur> lesCouleurs = new ArrayList<>();
+                List<CarteTransport> carteAUtilisé = new ArrayList<>();
+                int cptJoker = 0;
+                int cptBateau = 0;
+                for (Couleur c : Couleur.values()) {
+                    cptJoker = 0;
+                    cptBateau = 0;
+                    for (CarteTransport cart : cartesTransport) {
+                        if (cart.getCouleur().equals(c) && cart.getType().equals(TypeCarteTransport.BATEAU) && cart.estDouble()) {
+                            /*Pour payer une route maritime verte de longueur 3, il essaie de jouer :
+                            carte simple puis carte double,
+                            les règles précisent bien qu'on peut dépasser le coût avec des cartes double bateau, et aucune carte n'est inutile*/
+                            cptBateau += 2;
+                        } else if (cart.getCouleur().equals(c) && cart.getType().equals(TypeCarteTransport.BATEAU) && !cart.estDouble()) {
+                            cptBateau++;
+                        } else if (cart.getType().equals(TypeCarteTransport.JOKER)) {
+                            cptJoker++;
+                        }
+                    }
+                    if (cptJoker + cptBateau >= longeur) {
+                        lesCouleurs.add(c);
+                    }
+                }
+                return lesCouleurs;
+            } else { // la route n'est pas grise
+
+                List<Couleur> lesCouleurs = new ArrayList<>();
+                List<CarteTransport> carteAUtilisé = new ArrayList<>();
+                int cptJoker = 0;
+                int cptBateau = 0;
+                for (CarteTransport cart : cartesTransport) {
+                    if (cart.getCouleur().equals(laRoute.getCouleur()) && cart.getType().equals(TypeCarteTransport.BATEAU) && cart.estDouble()) {
+                            /*Pour payer une route maritime verte de longueur 3, il essaie de jouer :
+                            carte simple puis carte double,
+                            les règles précisent bien qu'on peut dépasser le coût avec des cartes double bateau, et aucune carte n'est inutile*/
+                        cptBateau += 2;
+                    } else if (cart.getCouleur().equals(laRoute.getCouleur()) && cart.getType().equals(TypeCarteTransport.BATEAU) && !cart.estDouble()) {
+                        cptBateau++;
+                    } else if (cart.getType().equals(TypeCarteTransport.JOKER)) {
+                        cptJoker++;
+                    }
+                }
+                if (cptJoker + cptBateau >= longeur) {
+                    lesCouleurs.add(laRoute.getCouleur());
+                }
+            }
+        }
+
+
+        if (laRoute.estTerrestre()) {
+            if (laRoute.getCouleur().equals(Couleur.GRIS)) { // on peut jouer nimporte quel couleur
+                List<Couleur> lesCouleurs = new ArrayList<>();
+                List<CarteTransport> carteAUtilisé = new ArrayList<>();
+                int cptWagon = 0;
+                int cptJoker = 0;
+                for (Couleur c : Couleur.values()) {
+                    cptWagon = 0;
+                    cptJoker = 0;
+                    for (CarteTransport cart : cartesTransport) {
+                        if (cart.getCouleur().equals(c) && cart.getType().equals(TypeCarteTransport.WAGON)) {
+                            cptWagon++;
+                        } else if (cart.getType().equals(TypeCarteTransport.JOKER)) {
+                            cptJoker++;
+                        }
+
+                    }
+                    if (cptJoker + cptWagon >= longeur) {
+                        lesCouleurs.add(c);
+                    }
+                }
+                return lesCouleurs;
+            }
+            else { // la route n'est pas grise
+
+                List<Couleur> lesCouleurs = new ArrayList<>();
+                List<CarteTransport> carteAUtilisé = new ArrayList<>();
+                int cptWagon = 0;
+                int cptJoker = 0;
+                    for (CarteTransport cart : cartesTransport) {
+                        if (cart.getCouleur().equals(laRoute.getCouleur()) && cart.getType().equals(TypeCarteTransport.WAGON)) {
+                            cptWagon++;
+                        } else if (cart.getType().equals(TypeCarteTransport.JOKER)) {
+                            cptJoker++;
+                        }
+
+                    }
+                    if (cptJoker + cptWagon >= longeur) {
+                        lesCouleurs.add(laRoute.getCouleur());
+                    }
+                return lesCouleurs;
+            }
+
+        }
+        return new ArrayList<>();
     }
 
     private void poserRoute() {
