@@ -11,7 +11,7 @@ public class RoutePaire extends Route {
         return false;
     }
     public boolean estTerrestre(){
-        return true;
+        return false;
     }
     public boolean estPair(){
         return true;

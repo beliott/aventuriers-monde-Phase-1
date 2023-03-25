@@ -393,7 +393,6 @@ public class JoueurProfTest {
                 "C142", // wagon vert (invalide)
                 "C144"); // joker
         joueur1.jouerTour();
-
         assertEquals(3, cartesJoueur1.size());
         assertTrue(cartesJoueur1.contains(c2));
         assertTrue(cartesJoueur1.contains(c3));

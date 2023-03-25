@@ -1,5 +1,7 @@
 package fr.umontpellier.iut.rails.data;
 
+import java.util.Objects;
+
 public final class CarteTransport implements Comparable<CarteTransport> {
 
     /**
@@ -103,5 +105,17 @@ public final class CarteTransport implements Comparable<CarteTransport> {
 
     public boolean isEstDouble() {
         return estDouble;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CarteTransport that)) return false;
+        return estDouble == that.estDouble && ancre == that.ancre && type == that.type && couleur == that.couleur && Objects.equals(nom, that.nom);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, couleur, estDouble, ancre, nom);
     }
 }
