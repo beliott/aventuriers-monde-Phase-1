@@ -226,21 +226,29 @@ public class Joueur {
 
                 log(String.format("%s a choisi %s", toLog(), choix));
 
-                if (choix.equals("WAGON")){ // ACTIONS COUTANT 1
+                boolean aPuJouer = false;
+                for (CarteTransport c : jeu.cartesTransportVisibles()) {
+                    if(c.getNom().equals(choix)){
+                        if (c.getType().equals(JOKER)){
+                            piocherCarteVisible(choix);
+                            cptActions = 0; // piocher un joker visible empeche de repiocher apres
+                        } else {
+                            cptActions -= 1;
+                            piocherCarteVisible(choix);
+                        }
+                        aPuJouer = true;
+                        break;
+                    }
+                }
+                if (aPuJouer){
+                    continue;
+                }
+                else if (choix.equals("WAGON")){ // ACTIONS COUTANT 1
                     this.cartesTransport.add(jeu.piocherCarteWagon());
                     cptActions -= 1;
                 } else if (choix.equals("BATEAU")) {
                     this.cartesTransport.add(jeu.piocherCarteBateau());
                     cptActions -= 1;
-                } else if (jeu.getCartesTransportVisibles().contains(jeu.getCarteByNom(choix))) { // si choix rpz carteVisible
-                    if (jeu.getCarteByNom(choix).getType().equals(JOKER)){
-                        piocherCarteVisible(choix);
-                        cptActions = 0; // piocher un joker visible empeche de repiocher apres
-                    } else {
-                        cptActions -= 1;
-                        piocherCarteVisible(choix);
-                    }
-
                 } else if (choix.equals("PIONS WAGON") || choix.equals("PIONS BATEAU")) { // ACTIONS COUTANT 2
                     echangerPions(choix);
                     cptActions = 0;
@@ -1223,11 +1231,13 @@ public class Joueur {
     }
 
     public void piocherCarteVisible(String carte){
-        for (CarteTransport c : jeu.getCartesTransportVisibles()) {
+        CarteTransport c;
+        for (int i = 0; i < jeu.cartesTransportVisibles().size(); i++){
+            c = jeu.cartesTransportVisibles().get(0);
             if (c.getNom().equals(carte)){
                 this.cartesTransport.add(c);
                 jeu.poserUneCarteVisible();
-                jeu.cartesTransportVisibles().remove(jeu.getCarteByNom(carte));
+                jeu.cartesTransportVisibles().remove(c);
                 return;
             }
         }
@@ -1276,5 +1286,8 @@ public class Joueur {
     public int getSommePions (){
         return nbPionsBateau + nbPionsWagon;
     }
+
+
+
 
 }

@@ -33,7 +33,7 @@ public class Jeu implements Runnable {
     /**
      * TOUTES LES CARTES, TTES LES VILLES, TTES LES ROUTES
      * */
-    private final List<CarteTransport> allCartesTransports;
+    private static final List<CarteTransport> allCartesTransports = new ArrayList<>();
     private final List<Ville> allVilles;
 
     /**
@@ -138,15 +138,14 @@ public class Jeu implements Runnable {
         }
         this.joueurCourant = joueurs.get(0);
 
-        this.allCartesTransports = new ArrayList<>();
-        this.allCartesTransports.addAll(toutesCartesTransport);
+        allCartesTransports.addAll(toutesCartesTransport);
 
         this.allVilles = new ArrayList<>();
         this.allVilles.addAll(portsLibres);
 
     }
 
-    public CarteTransport getCarteByNom(String nom){
+    public static CarteTransport getCarteByNom(String nom){
         for (CarteTransport c : allCartesTransports) {
             if (c.getNom().equals(nom)){
                 return c;
@@ -408,12 +407,15 @@ public class Jeu implements Runnable {
                 buttons.add(new Bouton("BATEAU"));
                 strChoixPossibles.add("BATEAU");
             }
-            String choix = joueurCourant.choisir("Dans quelle pile voulez-vous piocher une carte à retourner ?", strChoixPossibles, buttons, false);
-            if (choix.equals("WAGON")){
-                cartesTransportVisibles.add(piocherCarteWagon());
-            } else if (choix.equals("BATEAU")) { // pas besoin de verif car ne sort pas du choix si pas possible de tirer une carte du type ou pile vide
-                cartesTransportVisibles.add(piocherCarteBateau());
+            if (strChoixPossibles.size() > 0){
+                String choix = joueurCourant.choisir("Dans quelle pile voulez-vous piocher une carte à retourner ?", strChoixPossibles, buttons, false);
+                if (choix.equals("WAGON")){
+                    cartesTransportVisibles.add(piocherCarteWagon());
+                } else if (choix.equals("BATEAU")) { // pas besoin de verif car ne sort pas du choix si pas possible de tirer une carte du type ou pile vide
+                    cartesTransportVisibles.add(piocherCarteBateau());
+                }
             }
+
             verifierCartesVisibles(true);
         }
     }
