@@ -304,7 +304,6 @@ public class Joueur {
                     }
                 }
             }
-
             String carteSelect = choisir("Choisissez les cartes à défausser", cartesPossibles, null, false);
             if (choixCoul == null && !getCarteMainByNom(carteSelect).getType().equals(JOKER)){
                 choixCoul = getCarteMainByNom(carteSelect).getCouleur();
@@ -332,7 +331,7 @@ public class Joueur {
             cartesTransportPosees.remove(0);
         }
         ports.add(jeu.getVillebyNom(nomDuPort));
-        jeu.getPortsLibres().remove(jeu.getVillebyNom(nomDuPort));
+        jeu.getVraiPortLibre().remove(jeu.getVillebyNom(nomDuPort));
     }
 
     private List<Couleur> peutPoserPort(String nomDuPort){
@@ -445,6 +444,9 @@ public class Joueur {
                 present = true;
                 break;
             }
+        }
+        if (routes.contains(laRoute.getRouteParallele())){ // Si on possede la route parallele on a pas le droit de poser cette route
+            return new ArrayList<Couleur>();
         }
         if (!present){ // si laroute n'a pas ete recup dans la boucle au dessus, alors elle nest pas libre
             return new ArrayList<Couleur>();
@@ -613,33 +615,77 @@ public class Joueur {
 
 
         if (laRoute.estMaritime()) {
+            int cptSimple=0;
+            int cptDouble=0;
             for (CarteTransport c : this.cartesTransport) {
                 if (c.getType().equals(TypeCarteTransport.JOKER) || (c.getType().equals(TypeCarteTransport.BATEAU) && lesCouleursPaiementPossible.contains(c.getCouleur()))) {
                     lesCartesPossedes.add(c);
                     carteTransportsEnString.add(c.getNom());
+                    if (c.getType().equals(JOKER) || !c.estDouble()){
+                        cptSimple++;
+                    }
+                    else {
+                        cptDouble++;
+                    }
                 }
             }
+            if (cptDouble == laRoute.getLongueur()/2 && cptSimple ==1) {
+                carteTransportsEnString.clear();
+                for (CarteTransport c : this.cartesTransport) {
+                    if (c.estDouble() && lesCouleursPaiementPossible.contains(c.getCouleur())) {
+                        carteTransportsEnString.add(c.getNom());
+                    }
+                }
+            }
+            int utilitaire = 0;
+            boolean conditionFinir = false;
+            boolean carteSimple = false;
             argent = 0;
             Couleur laCouleurChoisis = null;
             do {
-                un = choisir("Veuillez selectionner des cartes Wagons pour capturer la route", carteTransportsEnString, null, false);
+                if (conditionFinir==true && utilitaire == 0){
+                    if (!carteTransportsEnString.isEmpty()){
+                        carteTransportsEnString.clear();
+                    }
+                    for (CarteTransport c : lesCartesPossedes) {
+                        if (c.getType().equals(JOKER)){
+                            carteTransportsEnString.add(c.getNom());
+                        }
+                        else if(c.getType().equals(BATEAU) && !c.estDouble() && lesCouleursPaiementPossible.contains(c.getCouleur()) && (laCouleurChoisis == null || c.getCouleur().equals(laCouleurChoisis))){
+                            carteTransportsEnString.add(c.getNom());
+                        }
+                    }
+                    utilitaire++;
+                }
+                un = choisir("Veuillez selectionner des cartes Bateau pour capturer la route", carteTransportsEnString, null, false);
                 for (CarteTransport c : lesCartesPossedes) {
                     if (un.equals(c.getNom())) {
                         if ((laCouleurChoisis == null || (c.getCouleur().equals(laCouleurChoisis) && c.getType().equals(TypeCarteTransport.BATEAU)) || c.getType().equals(TypeCarteTransport.JOKER))) {
                             if (c.estDouble()) {
                                 argent += 2;
+                                cptDouble--;
                             } else {
-                                argent++;
+                                carteSimple = true;
+                                cptSimple--;
+                                argent+=1;
                             }
+
                             this.cartesTransportPosees.add(c);
                             this.cartesTransport.remove(c);
                             carteTransportsEnString.remove(un);
-                            argent++;
                             if (laCouleurChoisis == null) {
                                 if (un.equals(c.getNom()) && c.getType().equals(TypeCarteTransport.BATEAU)) {
                                     laCouleurChoisis = c.getCouleur();
                                 }
                             }
+                        }
+                    }
+                }
+
+                if (argent == laRoute.getLongueur()-1 && laRoute.getLongueur()!=1){
+                    if (carteSimple==true && utilitaire==0) {
+                        if (cptSimple>0){
+                            conditionFinir=true;
                         }
                     }
                 }
@@ -675,8 +721,6 @@ public class Joueur {
                         }
                     }
                 }
-
-
                 if (argent == laRoute.getLongueur()) {
                     paiementPossible = true;
                 }
@@ -719,45 +763,20 @@ public class Joueur {
             }
         } else if (laRoute.estMaritime()){
             for (CarteTransport carte : cartesTransportPosees) {
-                jeu.getPilesDeCartesBateau().defausser(carte);
+                if (carte.getType().equals(BATEAU)){
+                    jeu.getPilesDeCartesBateau().defausser(carte);
+                }
+                else {
+                    jeu.getPilesDeCartesWagon().defausser(carte);
+                }
+
             }
         }
-
         this.routes.add(laRoute);
-        jeu.getRoutesLibres().remove(laRoute);
+        jeu.getVraiRouteLibres().remove(laRoute);
 
         this.cartesTransportPosees.clear();
         score += laRoute.getScore();
-    }
-
-
-
-
-    private boolean carteEgalRoute(List<CarteTransport> cartesTransportPosees, Route route, boolean montantEgal) {
-        int nbCartes = cartesTransportPosees.size();
-        int nbMaxCartesIdentiques = getNombreMaxCartesIdentiquesForRouteType(route.estMaritime() ? BATEAU : WAGON);
-        int nbJoker = getNbJoker(cartesTransportPosees);
-        int nbBonneCouleur = getNbCartesBonneCouleurEtType(cartesTransportPosees,getTypeRoute(route),route.getCouleur());
-        int nbCartesNecessaires = route.getLongueur();
-
-        if (!montantEgal && nbCartes + nbJoker + nbMaxCartesIdentiques >= nbCartesNecessaires) {
-            return true;
-        }
-
-        if (montantEgal && nbCartes != nbCartesNecessaires) {
-            return false;
-        }
-
-        return nbBonneCouleur + nbJoker >= nbCartesNecessaires;
-    }
-    private int getNombreMaxCartesIdentiquesForRouteType(TypeCarteTransport type) {
-        int maxNombreCartes = 0;
-        for (Route route : this.jeu.getRoutesLibres()) {
-            if (getTypeRoute(route) == type && route.getLongueur() > maxNombreCartes) {
-                maxNombreCartes = route.getLongueur();
-            }
-        }
-        return maxNombreCartes;
     }
 
     /**
@@ -912,49 +931,6 @@ public class Joueur {
         return nbCartesGardees;
     }
 
-    boolean destinationEstComplete2(Destination d) {
-        if (routesConnectees(d.getVillesDeDestination().get(0)).isEmpty()){  // si cest vide on return false
-            return false;
-        }
-
-        boolean fini = false;
-        List<Route> lesRoutes = routesConnectees(d.getVillesDeDestination().get(0));
-        for (int i = 0; i < d.getVillesDeDestination().size(); i++) {
-            fini = false;
-            for (Route lesRoute : lesRoutes) {
-                if (d.getVillesDeDestination().get(i).equals(lesRoute.getVille1()) || d.getVillesDeDestination().get(i).equals(lesRoute.getVille2())) {
-                    fini = true;
-                }
-            }
-            if (fini){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    boolean destinationEstCompleteBis(Destination d) {
-        if (routesConnectees(d.getVillesDeDestination().get(0)).isEmpty()){  // si cest vide on return false
-            return false;
-        }
-
-        boolean destinationComplete = true;
-        List<Route> lesRoutes = routesConnectees(d.getVillesDeDestination().get(0));
-        for (Ville v : d.getVillesDeDestination()) {
-            boolean estContenu = false;
-            for (Route r : lesRoutes) {
-                if (r.getVille1().equals(v) || r.getVille2().equals(v)) {
-                    estContenu = true;
-                }
-            }
-            if (!estContenu) {
-                destinationComplete = false;
-                break;
-            }
-        }
-        return destinationComplete;
-    }
-
     boolean destinationEstComplete(Destination d){
         List<Ville> villesDestinations = d.getVillesDeDestination();
         boolean destinationComplete = true; // par défaut c'est vrai et dès que l'on trouve un ville qui n'est pas parcouru on met à false
@@ -1041,7 +1017,6 @@ public class Joueur {
         return lesVilles;
     }
 
-
     public int cptScoreDestinations(){
         int cpt = 0; // compteur de point pour les cartes destinations
         for (int i = 0; i < this.destinations.size() ; i++) {
@@ -1082,13 +1057,6 @@ public class Joueur {
                 Map.entry("ports", ports.stream().map(Ville::nom).toList()),
                 Map.entry("routes", routes.stream().map(Route::getNom).toList()));
     }
-    int genererInt(int borneInf, int borneSup){
-        Random random = new Random();
-        int nb;
-        nb = borneInf+random.nextInt(borneSup-borneInf);
-        return nb;
-    }
-
     public int getNbPionsWagon() {
         return nbPionsWagon;
     }
@@ -1135,15 +1103,6 @@ public class Joueur {
         } else {
             return WAGON;
         }
-    }
-    private int getNbCartesBonneCouleurEtType(List<CarteTransport> cartes, TypeCarteTransport type, Couleur couleur) {
-        int nbCartesBonneCouleurEtType = 0;
-        for (CarteTransport carte : cartes) {
-            if (carte.getCouleur() == couleur && carte.getType() == type) {
-                nbCartesBonneCouleurEtType++;
-            }
-        }
-        return nbCartesBonneCouleurEtType;
     }
 
     public void setRatioPions(){ // MARCHE QU'AU DEBUT
@@ -1213,23 +1172,6 @@ public class Joueur {
         return lesCartesAncres;
     }
 
-    public boolean couleurCheckCount(List<CarteTransport> listeAVerif){//check si il ya au moins 2 carte de meme couleurs
-        int nbCoul = 0;
-        boolean deuxCoulSiIlEstCool = false;
-        for (Couleur c : Couleur.values()) {
-            nbCoul = 0;
-            for (CarteTransport cart : listeAVerif) {
-                if (cart.getCouleur() == c){
-                    nbCoul++;
-                }
-            }
-            if (nbCoul >= 2){
-                return true;
-            }
-        }
-        return false;
-    }
-
     public void piocherCarteVisible(String carte){
         CarteTransport c;
         for (int i = 0; i < jeu.cartesTransportVisibles().size(); i++){
@@ -1242,7 +1184,6 @@ public class Joueur {
             }
         }
     }
-
     public void echangerPions(String type){
         int nbMaxAPiocher;
         ArrayList<String> nbPeutPiocher = new ArrayList<>();
@@ -1286,8 +1227,6 @@ public class Joueur {
     public int getSommePions (){
         return nbPionsBateau + nbPionsWagon;
     }
-
-
 
 
 }

@@ -730,8 +730,8 @@ public class JoueurProfTest {
 
         jeu.setInput(
                 "R114", // route maritime Murmansk - Reykjavik (couleur VERT, longueur 4)
-                "C141", // (ok)
-                "C143", // (ok)
+                "C141", // (ok)  /
+                "C143", // (ok) /
                 "C144", // (invalide car si on accepte de défausser ces trois cartes la carte `C141` est
                         // inutile)
                 "C146" // (ok, la route est payée)

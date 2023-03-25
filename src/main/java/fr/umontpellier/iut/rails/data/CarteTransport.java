@@ -102,11 +102,6 @@ public final class CarteTransport implements Comparable<CarteTransport> {
     public boolean isAncre() {
         return ancre;
     }
-
-    public boolean isEstDouble() {
-        return estDouble;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

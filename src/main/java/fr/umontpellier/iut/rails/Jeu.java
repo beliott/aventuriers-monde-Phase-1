@@ -176,11 +176,16 @@ public class Jeu implements Runnable {
     public List<Ville> getPortsLibres() {
         return new ArrayList<>(portsLibres);
     }
+    public List<Ville> getVraiPortLibre(){
+        return portsLibres;
+    }
 
     public List<Route> getRoutesLibres() {
         return new ArrayList<>(routesLibres);
     }
-
+    public List<Route> getVraiRouteLibres(){
+        return this.routesLibres;
+    }
     public List<CarteTransport> getCartesTransportVisibles() {
         return new ArrayList<>(cartesTransportVisibles);
     }
@@ -552,4 +557,6 @@ public class Jeu implements Runnable {
     public PilesCartesTransport getPilesDeCartesWagon() {
         return pilesDeCartesWagon;
     }
+
+
 }
