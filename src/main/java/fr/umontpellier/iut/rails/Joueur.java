@@ -839,12 +839,12 @@ public class Joueur {
                 }
                 Couleur carteSelectCouleur = carteSelect.getCouleur();
                 int i = tableIndexage.indexOf(carteSelectCouleur);
-                // TODO ICI
+
                 int sommeCoul = 0;
                 tableFrequenceCouleurs.set(i, tableFrequenceCouleurs.get(i) + 1); // +1 la coul actuelle
-                for (Integer entier: tableFrequenceCouleurs){
+                for (Integer entier: tableFrequenceCouleurs){// TODO ICI
                     sommeCoul += entier / 2 + entier % 2;
-                    if (entier > 1 && !couleursUtilisees.contains(tableIndexage.get(i))){
+                    if (entier > 1 && !couleursUtilisees.contains(tableIndexage.get(i))){ // TODO ICI
                         couleursUtilisees.add(tableIndexage.get(i));
                     }
                 }
