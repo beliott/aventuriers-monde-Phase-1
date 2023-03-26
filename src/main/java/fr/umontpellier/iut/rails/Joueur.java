@@ -743,21 +743,24 @@ public class Joueur {
             // tab Frequence
             ArrayList<Couleur> tableIndexage = new ArrayList<>();
             ArrayList<Integer> tableFrequence = new ArrayList<>();
+            ArrayList<Integer> pointsBruts = new ArrayList<>(tableFrequence.size());
+            ArrayList<Integer> pointsFactices = new ArrayList<>(tableFrequence.size());
             for (Couleur cl: Couleur.values()){
                 tableIndexage.add(cl);
                 tableFrequence.add(0);
+                pointsBruts.add(0);
+                pointsFactices.add(0);
             }
             for (CarteTransport c : cartesTransport) {
                 for (int i = 0; i < tableIndexage.size(); i++) {
                     if (c.getCouleur() == tableIndexage.get(i)){
-                        tableFrequence.set(tableFrequence.get(i) + 1, i);
+                        tableFrequence.set(i, tableFrequence.get(i) + 1);
                     }
                 }
             }
 
 
-            ArrayList<Integer> pointsBruts = new ArrayList<>(tableFrequence.size());
-            ArrayList<Integer> pointsFactices = new ArrayList<>(tableFrequence.size());
+
             ArrayList<CarteTransport> cartesPossiblesBrutes = new ArrayList<>();
             ArrayList<CarteTransport> cartesPossiblesFactices = new ArrayList<>();
             int cptJokersUtilises = 0; int cptBrut = 0; int cptFactice = 0; int cptJokersAConsommer = 0;
@@ -786,7 +789,10 @@ public class Joueur {
                 }
                 cpt++;
             }
-
+            int tailleRoute = laRoute.getLongueur();
+            int cptCouleurs = 0;
+            boolean noMoreColors = false;
+            ArrayList<Couleur> couleursUtilisees = new ArrayList<>(tailleRoute);
             while (cptBrut + cptFactice + cptJokersUtilises != laRoute.getLongueur() * 2){
             /*######################################################
             ################# Faire un choix  ######################
@@ -799,8 +805,15 @@ public class Joueur {
                         if (c.getType().equals(JOKER)){
                             options.add(c.getNom());
                         }
+                    } else if (noMoreColors) {
+                        if (cartesPossiblesBrutes.contains(c) && (couleursUtilisees.contains(c.getCouleur()) || c.getType().equals(JOKER))){
+                            options.add(c.getNom());
+                        }
+                        else if (cartesPossiblesFactices.contains(c) && accesAuxFactices && (couleursUtilisees.contains(c.getCouleur()) || c.getType().equals(JOKER))) {
+                            options.add(c.getNom());
+                        }
                     } else {
-                        if (cartesPossiblesBrutes.contains(c)){
+                        if (cartesPossiblesBrutes.contains(c) ){
                             options.add(c.getNom());
                         }
                         else if (cartesPossiblesFactices.contains(c) && accesAuxFactices) {
@@ -817,6 +830,15 @@ public class Joueur {
                     }
                 }
                 Couleur carteSelectCouleur = carteSelect.getCouleur();
+
+                if (!couleursUtilisees.contains(carteSelectCouleur) && !carteSelectCouleur.equals(Couleur.GRIS)){
+                    couleursUtilisees.add(carteSelectCouleur);
+                    cptCouleurs++;
+                    if(tailleRoute == cptCouleurs){
+                        noMoreColors = true;
+                    }
+                }
+
                 int i = tableIndexage.indexOf(carteSelectCouleur);
 
             /*######################################################
@@ -831,6 +853,7 @@ public class Joueur {
                     }
                     pointsBruts.set(i, pointsBruts.get(i) - 1);
                     cartesPossiblesBrutes.remove(carteSelect);
+                    cartesTransport.remove(carteSelect);
                     cartesTransportPosees.add(carteSelect);
                     if (tableFrequence.get(i) % 2 == 1 && pointsBruts.get(i) == 1 && pointsFactices.get(i) == 1){ // si ne peut plus faire de paires avec ses points bruts
                         pointsBruts.set(i, 0);
@@ -842,15 +865,18 @@ public class Joueur {
                     } else{
                         cptFactice++;
                         cptJokersAConsommer++;
-                        if (cptFactice == contientJokers){
-                            accesAuxFactices = false;
-                        }
+
                         if (laRoute.getLongueur() * 2 == (cptBrut + cptFactice + cptJokersUtilises) + cptJokersAConsommer){ // VERIF SI BON
                             accesUniqueJokers = true;
                         }
                     }
+                    if (cptFactice == contientJokers && cptJokersUtilises == contientJokers){
+                        accesAuxFactices = false;
+                    }
+
                     pointsFactices.set(i, 0); // en factice = 1 donc va forcement prendre 0
                     cartesPossiblesFactices.remove(carteSelect);
+                    cartesTransport.remove(carteSelect);
                     cartesTransportPosees.add(carteSelect);
 
                 }
@@ -1278,7 +1304,7 @@ public class Joueur {
     public void piocherCarteVisible(String carte){
         CarteTransport c;
         for (int i = 0; i < jeu.cartesTransportVisibles().size(); i++){
-            c = jeu.cartesTransportVisibles().get(0);
+            c = jeu.cartesTransportVisibles().get(i);
             if (c.getNom().equals(carte)){
                 this.cartesTransport.add(c);
                 jeu.poserUneCarteVisible();
