@@ -728,6 +728,8 @@ public class Joueur {
             } while (!paiementPossible);
         }
         else if (laRoute.estPaire()) { /** ROUTE PAIRE DEBUT */
+            boolean accesAuxFactices = true;
+            boolean accesUniqueJokers = false;
             // contientJokers
             int contientJokers = 0;
             for (CarteTransport c: cartesTransport) {
@@ -735,6 +737,8 @@ public class Joueur {
                     contientJokers++;
                 }
             }
+            if (contientJokers == 0)
+                accesAuxFactices = false;
 
         /*######################################################
         ############ Init points Bruts/factices ################
@@ -764,8 +768,7 @@ public class Joueur {
             ArrayList<CarteTransport> cartesPossiblesBrutes = new ArrayList<>();
             ArrayList<CarteTransport> cartesPossiblesFactices = new ArrayList<>();
             int cptJokersUtilises = 0; int cptBrut = 0; int cptFactice = 0; int cptJokersAConsommer = 0;
-            boolean accesAuxFactices = true;
-            boolean accesUniqueJokers = false;
+
 
             int cpt = 0;
             for (Integer i: tableFrequence) {
@@ -778,7 +781,7 @@ public class Joueur {
                         }
                     }
                 }
-                if (i % 2 == 1){ // pointsFactices
+                if (i % 2 == 1 && (accesAuxFactices || tableIndexage.get(i).equals(Couleur.GRIS))){ // pointsFactices
                     pointsFactices.set(cpt, i % 2);
                     // cartesPossibleFactices
                     for (CarteTransport c : cartesTransport) {
@@ -792,7 +795,12 @@ public class Joueur {
             int tailleRoute = laRoute.getLongueur();
             int cptCouleurs = 0;
             boolean noMoreColors = false;
+            ArrayList<Integer> tableFrequenceCouleurs = new ArrayList<>(tableIndexage.size()); // TODO ICI
+            for (Couleur cl: Couleur.values()) {
+                tableFrequenceCouleurs.add(0);
+            }
             ArrayList<Couleur> couleursUtilisees = new ArrayList<>(tailleRoute);
+
             while (cptBrut + cptFactice + cptJokersUtilises != laRoute.getLongueur() * 2){
             /*######################################################
             ################# Faire un choix  ######################
@@ -830,16 +838,28 @@ public class Joueur {
                     }
                 }
                 Couleur carteSelectCouleur = carteSelect.getCouleur();
-
-                if (!couleursUtilisees.contains(carteSelectCouleur) && !carteSelectCouleur.equals(Couleur.GRIS)){
-                    couleursUtilisees.add(carteSelectCouleur);
-                    cptCouleurs++;
-                    if(tailleRoute == cptCouleurs){
-                        noMoreColors = true;
+                int i = tableIndexage.indexOf(carteSelectCouleur);
+                // TODO ICI
+                int sommeCoul = 0;
+                tableFrequenceCouleurs.set(i, tableFrequenceCouleurs.get(i) + 1); // +1 la coul actuelle
+                for (Integer entier: tableFrequenceCouleurs){
+                    sommeCoul += entier / 2 + entier % 2;
+                    if (entier > 1 && !couleursUtilisees.contains(tableIndexage.get(i))){
+                        couleursUtilisees.add(tableIndexage.get(i));
                     }
                 }
+                if(sommeCoul == tailleRoute){
+                    noMoreColors = true;
+                }
 
-                int i = tableIndexage.indexOf(carteSelectCouleur);
+
+
+
+
+
+
+
+
 
             /*######################################################
             ############ Actions sur le deroulement  ###############
