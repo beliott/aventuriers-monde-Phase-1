@@ -452,7 +452,7 @@ public class Joueur {
             return new ArrayList<Couleur>();
         }
 
-        if (laRoute.estPair()) {
+        if (laRoute.estPaire()) {
             int cptPaires = 0;
             List<CarteTransport> lesJokers = new ArrayList<>();
             List<Couleur> lesCouleurs = new ArrayList<>();
@@ -543,7 +543,7 @@ public class Joueur {
             }
         }
 
-        if (laRoute.estTerrestre() && !laRoute.estPair()) {
+        if (laRoute.estTerrestre() && !laRoute.estPaire()) {
             if (laRoute.getCouleur().equals(Couleur.GRIS)) { // on peut jouer nimporte quel couleur
                 List<Couleur> lesCouleurs = new ArrayList<>();
                 List<CarteTransport> carteAUtilisé = new ArrayList<>();
@@ -727,7 +727,7 @@ public class Joueur {
 
             } while (!paiementPossible);
         }
-        else if (laRoute.estPair()) { /** ROUTE PAIRE DEBUT */
+        else if (laRoute.estPaire()) { /** ROUTE PAIRE DEBUT */
             // contientJokers
             int contientJokers = 0;
             for (CarteTransport c: cartesTransport) {
@@ -793,11 +793,19 @@ public class Joueur {
             ######################################################*/
 
                 ArrayList<String> options = new ArrayList<>();
+
                 for (CarteTransport c : cartesTransport) {
-                    if (cartesPossiblesBrutes.contains(c)){
-                        options.add(c.getNom());
-                    } else if (cartesPossiblesFactices.contains(c)) {
-                        options.add(c.getNom());
+                    if (accesUniqueJokers){
+                        if (c.getType().equals(JOKER)){
+                            options.add(c.getNom());
+                        }
+                    } else {
+                        if (cartesPossiblesBrutes.contains(c)){
+                            options.add(c.getNom());
+                        }
+                        else if (cartesPossiblesFactices.contains(c) && accesAuxFactices) {
+                            options.add(c.getNom());
+                        }
                     }
                 }
                 String choix = choisir("Choisissez une carte a defausser pour payer la route", options, null, false);
@@ -852,7 +860,7 @@ public class Joueur {
         } /** FIN ROUTE PAIRE*/
 
 
-        if (laRoute.estTerrestre() || laRoute.estPair()) {
+        if (laRoute.estTerrestre() || laRoute.estPaire()) {
             for (CarteTransport carte : cartesTransportPosees) {
                 jeu.getPilesDeCartesWagon().defausser(carte);
             }

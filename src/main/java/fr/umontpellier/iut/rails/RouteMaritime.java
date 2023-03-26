@@ -16,7 +16,7 @@ public class RouteMaritime extends Route {
     }
 
     @Override
-    public boolean estPair() {
+    public boolean estPaire() {
         return false;
     }
 }

@@ -1,15 +1,12 @@
 package fr.umontpellier.iut.rails;
 
 import fr.umontpellier.iut.rails.data.Couleur;
-import fr.umontpellier.iut.rails.data.TypeCarteTransport;
 import fr.umontpellier.iut.rails.data.Ville;
-
-import java.util.ArrayList;
 
 public abstract class Route {
     public abstract boolean estMaritime();
     public abstract boolean estTerrestre();
-    public abstract boolean estPair();
+    public abstract boolean estPaire();
     /**
      * Première extrémité
      */
