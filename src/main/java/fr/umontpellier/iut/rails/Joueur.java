@@ -793,7 +793,6 @@ public class Joueur {
                 cpt++;
             }
             int tailleRoute = laRoute.getLongueur();
-            int cptCouleurs = 0;
             boolean noMoreColors = false;
             ArrayList<Integer> tableFrequenceCouleurs = new ArrayList<>(tableIndexage.size()); // TODO ICI
             for (Couleur cl: Couleur.values()) {
@@ -817,14 +816,14 @@ public class Joueur {
                         if (cartesPossiblesBrutes.contains(c) && (couleursUtilisees.contains(c.getCouleur()) || c.getType().equals(JOKER))){
                             options.add(c.getNom());
                         }
-                        else if (cartesPossiblesFactices.contains(c) && accesAuxFactices && (couleursUtilisees.contains(c.getCouleur()) || c.getType().equals(JOKER))) {
+                        else if (cartesPossiblesFactices.contains(c) && ((accesAuxFactices && couleursUtilisees.contains(c.getCouleur())) || c.getType().equals(JOKER))) {
                             options.add(c.getNom());
                         }
                     } else {
                         if (cartesPossiblesBrutes.contains(c) ){
                             options.add(c.getNom());
                         }
-                        else if (cartesPossiblesFactices.contains(c) && accesAuxFactices) {
+                        else if (cartesPossiblesFactices.contains(c) && (accesAuxFactices || c.getType().equals(JOKER))) {
                             options.add(c.getNom());
                         }
                     }
@@ -844,7 +843,7 @@ public class Joueur {
                 tableFrequenceCouleurs.set(i, tableFrequenceCouleurs.get(i) + 1); // +1 la coul actuelle
                 for (Integer entier: tableFrequenceCouleurs){// TODO ICI
                     sommeCoul += entier / 2 + entier % 2;
-                    if (entier > 1 && !couleursUtilisees.contains(tableIndexage.get(i))){ // TODO ICI
+                    if (entier >= 1 && !couleursUtilisees.contains(tableIndexage.get(i))){ // TODO ICI
                         couleursUtilisees.add(tableIndexage.get(i));
                     }
                 }
@@ -875,9 +874,20 @@ public class Joueur {
                     cartesPossiblesBrutes.remove(carteSelect);
                     cartesTransport.remove(carteSelect);
                     cartesTransportPosees.add(carteSelect);
-                    if (tableFrequence.get(i) % 2 == 1 && pointsBruts.get(i) == 1 && pointsFactices.get(i) == 1){ // si ne peut plus faire de paires avec ses points bruts
-                        pointsBruts.set(i, 0);
-                    }
+                    if (tableFrequence.get(i) % 2 == 1 ){ // si ne peut plus faire de paires avec ses points bruts
+                        cartesPossiblesFactices.remove(carteSelect);
+                        if (pointsBruts.get(i) == 1 && pointsFactices.get(i) == 1){
+                            for (CarteTransport c : cartesPossiblesBrutes){
+                                if (c.getCouleur() == carteSelectCouleur){
+                                    cartesPossiblesBrutes.remove(c);
+                                    break;
+                                }
+                            }
+                            pointsBruts.set(i, 0);
+                        }
+
+
+                    } // TODO : enlever des factices svp
                 }
                 else {
                     if (carteSelect.getType().equals(JOKER)){
@@ -890,7 +900,7 @@ public class Joueur {
                             accesUniqueJokers = true;
                         }
                     }
-                    if (cptFactice == contientJokers && cptJokersUtilises == contientJokers){
+                    if (cptFactice == contientJokers && cptJokersAConsommer == contientJokers){
                         accesAuxFactices = false;
                     }
 
