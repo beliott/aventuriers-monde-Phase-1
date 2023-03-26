@@ -1228,5 +1228,89 @@ public class Joueur {
         return nbPionsBateau + nbPionsWagon;
     }
 
+    public void capturerRoutePaire(RoutePaire laRoute){
+        // contientJokers
+        int contientJokers = 0;
+        for (CarteTransport c: cartesTransport) {
+            if (c.getType().equals(JOKER)){
+                contientJokers++;
+                break;
+            }
+        }
+
+        /*######################################################
+        ############ Init points Bruts/factices ################
+        ######################################################*/
+
+        // tab Frequence
+        ArrayList<Couleur> tableIndexage = new ArrayList<>();
+        ArrayList<Integer> tableFrequence = new ArrayList<>();
+        for (Couleur cl: Couleur.values()){
+            tableIndexage.add(cl);
+            tableFrequence.add(0);
+        }
+        for (CarteTransport c : cartesTransport) {
+            for (int i = 0; i < tableIndexage.size(); i++) {
+                if (c.getCouleur() == tableIndexage.get(i)){
+                    tableFrequence.set(tableFrequence.get(i) + 1, i);
+                }
+            }
+        }
+        ArrayList<Integer> pointsBruts = new ArrayList<>(tableFrequence.size());
+        ArrayList<Integer> pointsFactices = new ArrayList<>(tableFrequence.size());
+        ArrayList<CarteTransport> cartesPossiblesBrutes = new ArrayList<>();
+        ArrayList<CarteTransport> cartesPossiblesFactices = new ArrayList<>();
+
+        /**  METTRE LE WHILE ICI ????? */
+        int cpt = 0;
+        for (Integer i: tableFrequence) {
+            if (i >= 2){ // pointsBruts
+                pointsBruts.set(cpt, i);
+                // cartesPossiblesBrutes
+                for (CarteTransport c : cartesTransport) {
+                    if (c.getCouleur() == tableIndexage.get(cpt)){
+                        cartesPossiblesBrutes.add(c);
+                    }
+                }
+            }
+            if (i % 2 == 1){ // pointsFactices
+                pointsFactices.set(cpt, i % 2);
+                // cartesPossibleFactices
+                for (CarteTransport c : cartesTransport) {
+                    if (c.getCouleur() == tableIndexage.get(cpt)) {
+                        cartesPossiblesFactices.add(c);
+                    }
+                }
+            }
+            cpt++;
+        }
+
+         /*######################################################
+         ################# Faire un choix  ######################
+         ######################################################*/
+
+        ArrayList<String> options = new ArrayList<>();
+        for (CarteTransport c : cartesTransport) {
+            if (cartesPossiblesBrutes.contains(c)){
+                options.add(c.getNom());
+            } else if (cartesPossiblesFactices.contains(c)) {
+                options.add(c.getNom());
+            }
+        }
+        String choix = choisir("Choisissez une carte a defausser pour payer la route", options, null, false);
+        CarteTransport carteSelect = null;
+
+         /*######################################################
+         ############ Actions sur le deroulement  ###############
+         ######################################################*/
+
+        for (CarteTransport c : cartesTransport) { // recup carte choisie
+            if (c.getNom().equals(choix)){
+                carteSelect = c;
+            }
+        }
+
+        /** CONTINUER FONCTION */
+    }
 
 }
