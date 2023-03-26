@@ -163,13 +163,13 @@ public class Joueur {
 
 
                 if (nbPortsPeutPoser > 0){
-                    for (Ville v : jeu.getPortsLibres()) { // TODO : CHECKER
+                    for (Ville v : jeu.getPortsLibres()) {
                         if (!peutPoserPort(v.getNom()).isEmpty())
                             options.add(v.nom());
                     }
                 }// POUR BATIR PORT
 
-                for (Route r : jeu.getRoutesLibres()){ // TODO : marche pas
+                for (Route r : jeu.getRoutesLibres()){
                     if (!peutPoserRoute(r.getNom(), r.getLongueur()).isEmpty()){
                         if (r.estMaritime()){
                             if (nbPionsBateau >= r.getLongueur()){
@@ -255,13 +255,16 @@ public class Joueur {
                 } else if (choix.equals("DESTINATION")) {
                     prendreDestinations(false);
                     cptActions = 0;
-                } else if (jeu.getPortsLibres().contains(jeu.getVillebyNom(choix))) { // TODO : CHECKER SI CA MARCHE
+                } else if (jeu.getPortsLibres().contains(jeu.getVillebyNom(choix))) {
                     poserPort(choix);
                     nbPortsPeutPoser--;
                     cptActions = 0;
-                } else if (jeu.getRoutesLibres().contains(jeu.getRoutebyNom(choix))) { // TODO : CHECKER SI CA MARCHE
+                } else if (jeu.getRoutesLibres().contains(jeu.getRoutebyNom(choix))) {
                     poserRoute(choix);
                     cptActions = 0;
+                    if (jeu.getJoueurs().size() <4){
+                        supprimerRoute(choix);
+                    }
                     if (jeu.getRoutebyNom(choix) instanceof RouteMaritime){
                         nbPionsBateau -= jeu.getRoutebyNom(choix).getLongueur();
                     } else{
@@ -588,6 +591,16 @@ public class Joueur {
         return new ArrayList<Couleur>();
     }
 
+    public void supprimerRoute(String nom){
+        for (Route r: jeu.getRoutesDebut()) {
+            if (r.getNom().equals(nom)){
+                if (r.getRouteParallele()!=null){
+                    jeu.getVraiRouteLibres().remove(r.getRouteParallele());
+                }
+            }
+        }
+    }
+
     private void poserRoute(String nomVille) {
         if (this.cartesTransport.isEmpty()) {
             return;
@@ -794,7 +807,7 @@ public class Joueur {
             }
             int tailleRoute = laRoute.getLongueur();
             boolean noMoreColors = false;
-            ArrayList<Integer> tableFrequenceCouleurs = new ArrayList<>(tableIndexage.size()); // TODO ICI
+            ArrayList<Integer> tableFrequenceCouleurs = new ArrayList<>(tableIndexage.size());
             for (Couleur cl: Couleur.values()) {
                 tableFrequenceCouleurs.add(0);
             }
@@ -841,9 +854,9 @@ public class Joueur {
 
                 int sommeCoul = 0;
                 tableFrequenceCouleurs.set(i, tableFrequenceCouleurs.get(i) + 1); // +1 la coul actuelle
-                for (Integer entier: tableFrequenceCouleurs){// TODO ICI
+                for (Integer entier: tableFrequenceCouleurs){
                     sommeCoul += entier / 2 + entier % 2;
-                    if (entier >= 1 && !couleursUtilisees.contains(tableIndexage.get(i))){ // TODO ICI
+                    if (entier >= 1 && !couleursUtilisees.contains(tableIndexage.get(i))){
                         couleursUtilisees.add(tableIndexage.get(i));
                     }
                 }
@@ -887,7 +900,7 @@ public class Joueur {
                         }
 
 
-                    } // TODO : enlever des factices svp
+                    }
                 }
                 else {
                     if (carteSelect.getType().equals(JOKER)){

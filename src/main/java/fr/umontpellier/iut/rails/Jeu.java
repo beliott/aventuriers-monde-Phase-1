@@ -396,7 +396,6 @@ public class Jeu implements Runnable {
 
     /* Fonctions cartes visibles */
 
-    // TODO : reussir tests initialisation des cartes visibles meme si marche en vrai
     public void poserUneCarteVisible(){
         ArrayList<Bouton> buttons = new ArrayList<Bouton>();
         ArrayList<String> strChoixPossibles = new ArrayList<String>();
