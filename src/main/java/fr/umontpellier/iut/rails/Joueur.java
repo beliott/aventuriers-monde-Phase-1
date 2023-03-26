@@ -136,6 +136,59 @@ public class Joueur {
             options.clear();
             boutons.clear();
 
+             /*####################################################
+             ############## Verif cartes Visibles #################
+             ####################################################*/
+            if (jeu.cartesTransportVisibles().size() < 6){
+                if (!jeu.piocheBateauEstVide() && !jeu.piocheWagonEstVide()){
+                    ArrayList<String> choixCartesARemplacer = new ArrayList<>(2);
+                    ArrayList<Bouton> listeBoutons = new ArrayList<>(2);
+                    int nbCartesAAjouter = 6 - jeu.cartesTransportVisibles().size();
+                    int sommeSizes = jeu.getPilesDeCartesWagon().getFullSize() + jeu.getPilesDeCartesBateau().getFullSize();
+                    if (nbCartesAAjouter <= sommeSizes ){ // si moins ou autant de cartes ajoute que dans piles
+                        for (int i = 0; i < nbCartesAAjouter; i++) {
+                            int sizeW = jeu.getPilesDeCartesWagon().getFullSize();
+                            int sizeB = jeu.getPilesDeCartesBateau().getFullSize();
+                            if (sizeW >= 1){
+                                choixCartesARemplacer.add("WAGON");
+                                listeBoutons.add(new Bouton("WAGON"));
+                            }
+                            if (sizeB >= 1){
+                                choixCartesARemplacer.add("BATEAU");
+                                listeBoutons.add(new Bouton("BATEAU"));
+                            }
+                            if (choixCartesARemplacer.size() >= 1 ){
+                                String choix = choisir("Choisissez une carte pour remettre dans les cartes visibles", choixCartesARemplacer, listeBoutons, false);
+                                if (choix == "WAGON"){
+                                    jeu.cartesTransportVisibles().add(jeu.piocherCarteWagon());
+                                } else jeu.cartesTransportVisibles().add(jeu.piocherCarteBateau());
+                            }
+                        }
+                    } else if (sommeSizes > 0){
+                        for (int i = 0; i < sommeSizes; i++) {
+                            int sizeW = jeu.getPilesDeCartesWagon().getFullSize();
+                            int sizeB = jeu.getPilesDeCartesBateau().getFullSize();
+                            sommeSizes = sizeB + sizeW;
+                            if (sizeW >= 1){
+                                choixCartesARemplacer.add("WAGON");
+                                listeBoutons.add(new Bouton("WAGON"));
+                            }
+                            if (sizeB >= 1){
+                                choixCartesARemplacer.add("BATEAU");
+                                listeBoutons.add(new Bouton("BATEAU"));
+                            }
+                            if (choixCartesARemplacer.size() >= 1 ){
+                                String choix = choisir("Choisissez une carte pour remettre dans les cartes visibles", choixCartesARemplacer, listeBoutons, false);
+                                if (choix == "WAGON"){
+                                    jeu.cartesTransportVisibles().add(jeu.piocherCarteWagon());
+                                } else jeu.cartesTransportVisibles().add(jeu.piocherCarteBateau());
+                            }
+                        }
+                    }
+                }
+            }
+
+
             /*####################################################
              ################### CHOIX POSSIBLES #################
              ####################################################*/
